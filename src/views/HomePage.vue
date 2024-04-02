@@ -1,0 +1,32 @@
+<template>
+   <main>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h2 class="card-title">歡迎來到後台系統</h2>
+              <p class="card-text">這是一個偉大的地方，讓您可以輕鬆管理您的後台任務。</p>
+              <div class="list-group">
+                <router-link to="/members" class="list-group-item list-group-item-action">用戶管理</router-link>
+                <router-link to="/products" class="list-group-item list-group-item-action">產品管理</router-link>
+                <router-link to="/orders" class="list-group-item list-group-item-action">訂單管理</router-link>
+                <router-link to="/statistics" class="list-group-item list-group-item-action">統計資料</router-link>
+                <!-- 在這裡添加更多功能連結 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </main>
+</template>
+<script>
+export default {
+    
+}
+</script>
+<style>
+    
+</style>
