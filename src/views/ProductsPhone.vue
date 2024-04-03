@@ -101,7 +101,7 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal" tabindex="-1" role="dialog" ref="myModal">
+  <div class="modal" tabindex="-1" role="dialog" ref="xxmodal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -178,6 +178,7 @@ export default {
         setupDate: '',
         modifyDate: '',
       },
+
 
     };
   },
@@ -310,5 +311,12 @@ export default {
   /* 调整关闭按钮与顶部的距离 */
   right: 10px;
   /* 调整关闭按钮与右侧的距离 */
+}
+
+.table thead th {
+  white-space: nowrap;
+}
+.table tbody th {
+  white-space: nowrap;
 }
 </style>

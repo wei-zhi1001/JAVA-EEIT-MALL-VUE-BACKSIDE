@@ -32,10 +32,10 @@ const router = new createRouter({
       component: () => import("@/views/ProductsPad.vue"),
     },
     {
-      path: "/products/Spec",
+      path: "/products/Spec/",
       name: "Spec",
       component: () => import("@/views/ProductsSpec.vue"),
-      props: true,
+      
     },
     {
       path: "/statistics",
@@ -58,8 +58,9 @@ const router = new createRouter({
       component: () => import("@/views/ShowPhoto.vue"),
     },
 
+  
     {
-      path: "/modal",
+      path: "/test",
       component: () => import("@/views/Test.vue"),
     },
   ],
