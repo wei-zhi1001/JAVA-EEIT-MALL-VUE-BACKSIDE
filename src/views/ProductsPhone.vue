@@ -1,7 +1,7 @@
 <template>
   <main class="container">
     <h1>手機產品</h1>
-    <button type="button" class="btn btn-primary btn-add" @click="openModal">新增</button> <!-- 移到表格外部 -->
+    <button type="button" class="btn btn-primary btn-add" @click="openChangeModal">新增</button> <!-- 移到表格外部 -->
     <MyModal />
     <table class="table table-striped table-hover">
       <thead>
@@ -11,7 +11,7 @@
           <th scope="col">價格(元)</th>
           <th scope="col">容量</th>
           <th scope="col">螢幕尺寸</th>
-          <th scope="col">上架時間</th>
+          <th scope="col">更新時間</th>
           <!-- <th scope="col">修改日期</th> -->
           <th scope="col"> </th>
           <th scope="col"> </th>
@@ -25,26 +25,33 @@
           <td>{{ product.price }}</td>
           <td>{{ product.capacity }}</td>
           <td>{{ product.size }}</td>
-          <td>{{ formatDate(product.setupDate) }}</td>
+          <td>{{ formatDate(product.modifyDate) }}</td>
           <!-- <td>{{ formatDate(product.modifyDate) }}</td> -->
           <td>
-
-            <router-link :to="{
-      path: 'Spec',
-      query: {
-        x: product.productId,
-        y: product.productName,
-        z: product.price
-      }
-    }" class="button-link custom-link">
-              <!-- 在這裡放置你的連結內容 -->
-              <b-icon class="fas fa-book"></b-icon>
-              <font-awesome-icon v-if="stepVisible" icon="chevron-up"></font-awesome-icon>
-              <slot>修改</slot>
-            </router-link>
-
+            <button @click="redirectToSpec(product)">
+              <i class="fas fa-list"></i>
+              <!-- 修改圖示 -->
+              <span>樣式</span> <!-- 將"樣式"文字放在這裡 -->
+            </button>
           </td>
-          <td><i class="fas fa-trash"></i></td>
+          <td>
+            <button @click="openChangeModal(product)">
+              <i class="fas fa-pen"></i> <!-- 修改圖示 -->
+              <span>修改</span> <!-- 將"修改"文字放在這裡 -->
+            </button>
+          </td>
+          <td>
+            <button v-if="product.salesStatus === 0" @click="changeSalesStatus(product.productId)">
+              <i class="fas fa-check"></i> <!-- 上架圖示 -->
+              <span>上架</span> <!-- 上架文字 -->
+            </button>
+            <button v-else @click="changeSalesStatus(product.productId)">
+              <i class="fas fa-xmark"></i> <!-- 下架圖示 -->
+              <span>下架</span> <!-- 下架文字 -->
+            </button>
+          </td>
+
+          <!-- <td><i class="fas fa-trash"></i></td> -->
         </tr>
       </tbody>
     </table>
@@ -73,8 +80,9 @@
               <input type="text" class="form-control" id="productName" v-model="NewProduct.productName">
             </div>
             <div class="form-group">
-              <label for="productName">產品特性:</label>
-              <input type="text" class="form-control" id="productName" v-model="NewProduct.productDescription">
+              <label for="productDescription">產品特性:</label>
+              <input type="textarea" class="form-control h-200" id="productDescription"
+                v-model="NewProduct.productDescription">
             </div>
             <div class="form-group">
               <label for="price">價格(元):</label>
@@ -101,12 +109,12 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal" tabindex="-1" role="dialog" ref="xxmodal">
+  <div class="modal" tabindex="-1" role="dialog" ref="changeModal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">新增手機</h5>
-          <button type="button" class="close" aria-label="Close" @click="closeModal">
+          <h5 class="modal-title">修改手機內容</h5>
+          <button type="button" class="close" aria-label="Close" @click="closeChangeModal">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -136,8 +144,8 @@
               <label for="size">銀幕尺寸:</label>
               <input type="text" class="form-control" id="size" v-model="NewProduct.size">
             </div>
-            <div class="d-flex justify-content-end"> <!-- 新添加的 div -->
-              <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-secondary" @click="closeChangeModal">Close</button>
               <button type="submit" class="btn btn-primary ml-2" @click="saveProduct">Save</button>
             </div>
           </form>
@@ -160,14 +168,16 @@ const router = useRouter();
 const route = useRoute();
 console.log(route)
 import axios from 'axios';
-import MyModal from './Test.vue'
 
+import MyModal from './Test.vue'
+import ChangeModal from './Test.vue'
 
 export default {
   data() {
     return {
       products: [], // 将数据保存在数组中
       MyModal,
+      ChangeModal,
       NewProduct: {
         productId: '',
         productName: '',
@@ -184,6 +194,16 @@ export default {
   },
 
   methods: {
+    redirectToSpec(product) {
+      this.$router.push({
+        path: 'Spec',
+        query: {
+          x: product.productId,
+          y: product.productName,
+          z: product.price
+        }
+      });
+    },
     saveProduct() {
       // 保存产品前先显示二次确认提示
       if (confirm("您確定要新增這筆產品嗎？")) {
@@ -204,6 +224,40 @@ export default {
         console.log('取消保存');
       }
     },
+    saveChangeProduct() {
+      // 保存产品前先显示二次确认提示
+      if (confirm("您確定要保存這筆產品嗎？")) {
+        console.log('New Product:', this.NewProduct);
+
+        axios.put(`${this.API_URL}/products/updateProduct/${this.NewProduct.productId}`, this.NewProduct)
+          .then(response => {
+            this.resetFormData(); // 清空表单数据
+            console.log(response.data);
+            this.fetchData();
+            this.closeModal();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      } else {
+        // 如果用户取消保存操作，则不执行保存逻辑
+        console.log('取消保存');
+      }
+    },
+    changeSalesStatus(productId) {
+      axios.put(`${this.API_URL}/products/productSalesStatus?productId=${productId}`)
+        .then(response => {
+          console.log(response.data);
+          // 成功上下架後重新載入資料，更新產品列表
+          // this.fetchData();
+          this.$router.go();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    },
+
+
 
 
     resetFormData() {
@@ -227,6 +281,19 @@ export default {
       this.$refs.myModal.classList.remove('show');
       this.$refs.myModal.style.display = 'none';
       document.body.classList.remove('modal-open');
+      this.resetFormData()
+    },
+    openChangeModal(product) {
+      this.$refs.changeModal.classList.add('show');
+      this.$refs.changeModal.style.display = 'block';
+      document.body.classList.add('modal-open');
+      product && (this.NewProduct = product);
+    },
+    closeChangeModal() {
+      this.$refs.changeModal.classList.remove('show');
+      this.$refs.changeModal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      this.resetFormData()
     },
     formatDate(dateTimeString) {
       const options = {
@@ -260,7 +327,7 @@ export default {
   /* 背景透明 */
   color: black;
   /* 文字颜色 */
-  padding: 7px;
+  /* padding: 7px; */
   /* 设置内边距 */
   display: inline-block;
   /* 让链接变成行内块元素，以便控制宽度和高度 */
@@ -270,7 +337,7 @@ export default {
   /* 移除下划线 */
   transition: color 0.3s;
   /* 添加文字颜色的过渡效果 */
-  top: 10px;
+  /* top: 10px; */
 }
 
 .custom-link:hover {
@@ -316,7 +383,34 @@ export default {
 .table thead th {
   white-space: nowrap;
 }
+
 .table tbody th {
   white-space: nowrap;
+}
+/* 定義主顏色 */
+:root {
+  --primary-color: #007bff;
+}
+
+/* 定義按鈕樣式 */
+.table button {
+  border: 1px solid var(--primary-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  background-color: transparent;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 按鈕懸停時變化 */
+.table button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.table button {
+  margin-right: 0px; /* 設定按鈕的右邊距 */
 }
 </style>
