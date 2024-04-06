@@ -1,8 +1,9 @@
 <template>
   <main class="container">
     <h1>手機產品</h1>
-    <button type="button" class="btn btn-primary btn-add" @click="openChangeModal">新增</button> <!-- 移到表格外部 -->
-    <MyModal />
+    <button type="button" class="btn btn-primary btn-add" @click="openModal">新增</button> <!-- 移到表格外部 -->
+    <input type="text" v-model="searchTerm" class="form-control" placeholder="搜尋產品">
+
     <table class="table table-striped table-hover">
       <thead>
         <tr class="text-center">
@@ -13,13 +14,14 @@
           <th scope="col">螢幕尺寸</th>
           <th scope="col">更新時間</th>
           <!-- <th scope="col">修改日期</th> -->
-          <th scope="col"> </th>
-          <th scope="col"> </th>
-          <th scope="col"> </th>
+          <th scope="col">樣式</th>
+          <th scope="col">修改</th>
+          <th scope="col">下架</th>
+          <th scope="col">刪除</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(product, index) in products" :key="index" class="text-center" valign="middle">
+        <tr v-for="(product, index) in filteredProducts" :key="index" class="text-center" valign="middle">
           <td>{{ product.productId }}</td>
           <td>{{ product.productName }}</td>
           <td>{{ product.price }}</td>
@@ -30,26 +32,35 @@
           <td>
             <button @click="redirectToSpec(product)">
               <i class="fas fa-list"></i>
-              <!-- 修改圖示 -->
-              <span>樣式</span> <!-- 將"樣式"文字放在這裡 -->
             </button>
+            <!-- <span>樣式</span> -->
           </td>
+
           <td>
             <button @click="openChangeModal(product)">
-              <i class="fas fa-pen"></i> <!-- 修改圖示 -->
-              <span>修改</span> <!-- 將"修改"文字放在這裡 -->
+              <i class="fas fa-pen"></i>
             </button>
+            <!-- <span>修改</span> -->
           </td>
+
           <td>
             <button v-if="product.salesStatus === 0" @click="changeSalesStatus(product.productId)">
-              <i class="fas fa-check"></i> <!-- 上架圖示 -->
-              <span>上架</span> <!-- 上架文字 -->
+              <i class="fas fa-check"></i>
             </button>
             <button v-else @click="changeSalesStatus(product.productId)">
-              <i class="fas fa-xmark"></i> <!-- 下架圖示 -->
-              <span>下架</span> <!-- 下架文字 -->
+              <i class="fas fa-xmark"></i>
             </button>
+            <!-- <span v-if="product.salesStatus === 0">上架</span> -->
+            <!-- <span v-else>下架</span> -->
           </td>
+
+          <td>
+            <button @click="deletedProduct(product)">
+              <i class="fas fa-trash"></i>
+            </button>
+            <!-- <span>刪除</span> -->
+          </td>
+
 
           <!-- <td><i class="fas fa-trash"></i></td> -->
         </tr>
@@ -188,12 +199,34 @@ export default {
         setupDate: '',
         modifyDate: '',
       },
+      searchTerm: '',
+      filteredProducts: [],
 
 
     };
   },
-
+  watch: {
+    searchTerm(newValue) {
+      this.search();
+    },
+  },
   methods: {
+    deletedProduct(product) {
+      console.log();
+      if (confirm("您確定要刪除這筆產品嗎？")) {
+        axios.delete(`${this.API_URL}/products/deleteProduct?productId=${product.productId}`)
+          .then(response => {
+            this.products = this.products.filter(p => p !== product);
+            console.log('刪除成功');
+            this.$router.go();
+          })
+          .catch(error => {
+            console.error('Error deleting product:', error);
+          });
+
+      }
+    },
+
     redirectToSpec(product) {
       this.$router.push({
         path: 'Spec',
@@ -203,6 +236,26 @@ export default {
           z: product.price
         }
       });
+    },
+
+    search() {
+      // 根據搜索條件過濾產品列表
+      if (this.searchTerm.trim() === '') {
+        // 如果搜索條件為空，顯示所有產品
+        this.filteredProducts = this.products;
+        console.log('成功搜尋');
+      } else {
+        // 否則，過濾產品列表
+        this.filteredProducts = this.products.filter(product =>
+          product.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          product.price.toString().includes(this.searchTerm) ||
+          product.size.toLowerCase().includes(this.searchTerm.toLowerCase())||
+          product.productId.toString().includes(this.searchTerm)
+
+
+        );
+
+      }
     },
     saveProduct() {
       // 保存产品前先显示二次确认提示
@@ -245,6 +298,7 @@ export default {
       }
     },
     changeSalesStatus(productId) {
+      if (confirm("您確定要更改這筆產品販售狀態嗎？")) { }
       axios.put(`${this.API_URL}/products/productSalesStatus?productId=${productId}`)
         .then(response => {
           console.log(response.data);
@@ -256,10 +310,6 @@ export default {
           console.error('Error:', error);
         });
     },
-
-
-
-
     resetFormData() {
       this.NewProduct = {
         productId: '',
@@ -313,10 +363,12 @@ export default {
     axios.get(`${this.API_URL}/products/getProductByCategoryId?categoryId=A`)
       .then(response => {
         this.products = response.data;
+        this.search();
       })
       .catch(error => {
         console.error('Error fetching products:', error);
       });
+
   },
 }
 </script>
@@ -387,6 +439,7 @@ export default {
 .table tbody th {
   white-space: nowrap;
 }
+
 /* 定義主顏色 */
 :root {
   --primary-color: #007bff;
@@ -410,7 +463,15 @@ export default {
   background-color: var(--primary-color);
   color: #fff;
 }
+
 .table button {
-  margin-right: 0px; /* 設定按鈕的右邊距 */
+  margin-right: 0px;
+  /* 設定按鈕的右邊距 */
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2; /* 確保標題行在上方 */
+  background-color: #fff; /* 可以選擇性地設置背景色 */
 }
 </style>
