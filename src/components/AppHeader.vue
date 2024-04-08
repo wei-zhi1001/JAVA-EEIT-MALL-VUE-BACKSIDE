@@ -1,82 +1,82 @@
 <template>
-    <header class="p-3 text-bg-dark mb-3">
-        <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li>
-                        <router-link to="/" class="nav-link px-2 text-secondary">後臺系統</router-link>
-                    </li>
-                    <li>
-                        <router-link to="/members" class="nav-link px-2 text-white">會員管理</router-link>
-                    </li>
-                    <li>
-                        <router-link to="/products" class="nav-link px-2 text-white">商品管理</router-link>
-                    </li>
-                    <li>
-                        <router-link to="/orders" class="nav-link px-2 text-white">訂單管理</router-link>
-                    </li>
-                </ul>
+  <!-- navbar-->
+  <header class="header bg-white">
+    <div class="container px-lg-3">
+      <nav class="navbar navbar-expand-lg navbar-light py-3 px-lg-0"><a class="navbar-brand" href="index.html"><span class="fw-bold text-uppercase text-dark">Apple Tree</span></a>
+        <button class="navbar-toggler navbar-toggler-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <router-link to="/" class="nav-link active">Home</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/product" class="nav-link active">Shop</router-link>
+            </li>
+            <li>
+              <router-link to="/members" class="nav-link active">Members</router-link>
+            </li>
+            <li>
+              <router-link to="/products" class="nav-link active">Product</router-link>
+            </li>
+            <li>
+              <router-link to="/orders" class="nav-link active">Orders</router-link>
+            </li>
 
-                <div class="text-end">
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            
+            <router-link
+              class="nav-link"
+              to="/login"
+              v-if="!isLoggedIn"
+            >
+            <li class="nav-item"> <i class="fas fa-user me-1 text-gray fw-normal"></i>Login</li></router-link>
 
+            <template v-if="isLoggedIn" >
+              <li class="nav-item" @click="logout"><a class="nav-link" href="#!"> <i class="fas fa-user me-1 text-gray fw-normal"></i>Logout</a></li>
 
-                    <router-link to="/login" class="text-decoration-none" v-if="!isLoggedIn">
-                        <button type="button" class="btn btn-outline-light me-2">
-                            登入
-                        </button>
-                    </router-link>
-
-                    <template v-if="isLoggedIn">
-                        <router-link to="/profile" class="text-decoration-none">
-                            <button type="button" class="btn btn-warning">
-                                {{ memberName }}
-                            </button></router-link>
-                        <img :src="memberPhoto" width="8%" class="mx-2" />
-
-                        <button type="button" class="btn btn-outline-light" @click="logout()">登出</button>
-                    </template>
-                </div>
-            </div>
+            </template>
+          </ul>
         </div>
-    </header>
+      </nav>
+    </div>
+  </header>
+
 </template>
 <script>
-import { useMemberStore } from '@/stores/memberStore';
-import axios from 'axios';
+import { useUserStore } from "@/stores/userStore";
+import axios from "axios";
+
 export default {
-    computed: {
-        memberId() {
-            const memberStore = useMemberStore();
-            return memberStore.memberId;
-        },
-        memberName() {
-            const memberStore = useMemberStore();
-            return memberStore.memberName;
-
-        },
-        memberPhoto() {
-            const memberStore = useMemberStore();
-            return memberStore.memberPhoto;
-        },
-        isLoggedIn() {
-            const memberStore = useMemberStore();
-            return memberStore.isLoggedIn;
-        }
+  methods: {
+    logout() {
+      console.log("logout");
+      axios
+          .get(`${this.API_URL}/user/logout`)
+          .then((rs) => {
+            const userStore = useUserStore();
+            userStore.logout();
+            this.$router.push("/");
+          })
+          .catch((error) => {
+            console.log("登出失敗", error);
+          });
     },
-    methods: {
-        logout() {
-            const memberStore = useMemberStore();
-            axios.get(`${this.API_URL}/logout`).then((rs) => {
-                memberStore.logout();
-            })
-            .catch((error) => {
-                console.log("登出失敗",error)
-            })
-            console.log(memberStore)
-            this.$router.push("/" );
-        }
-
+  },
+  computed: {
+    name() {
+      const userStore = useUserStore();
+      return userStore.userName;
     },
-}
+    id() {
+      const userStore = useUserStore();
+      return userStore.userId;
+    },
+
+    isLoggedIn() {
+      return useUserStore().isLoggedIn;
+    },
+  },
+};
 </script>
 <style></style>

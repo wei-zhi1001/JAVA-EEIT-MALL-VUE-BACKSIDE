@@ -16,7 +16,7 @@
           <!-- <th scope="col">修改日期</th> -->
           <th scope="col">樣式</th>
           <th scope="col">修改</th>
-          <th scope="col">下架</th>
+          <th scope="col">下(上)架</th>
           <th scope="col">刪除</th>
         </tr>
       </thead>
@@ -228,6 +228,9 @@ export default {
     },
 
     redirectToSpec(product) {
+      sessionStorage.setItem('x', product.productId);
+      sessionStorage.setItem('y', product.productName);
+      sessionStorage.setItem('z', product.price);
       this.$router.push({
         path: 'Spec',
         query: {
@@ -249,7 +252,7 @@ export default {
         this.filteredProducts = this.products.filter(product =>
           product.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
           product.price.toString().includes(this.searchTerm) ||
-          product.size.toLowerCase().includes(this.searchTerm.toLowerCase())||
+          product.size.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
           product.productId.toString().includes(this.searchTerm)
 
 
@@ -360,6 +363,23 @@ export default {
     }
   },
   created() {
+    const loggedInMember = sessionStorage.getItem('loggedInMember');
+    const loggedInMemberObject = JSON.parse(loggedInMember);
+    console.log(loggedInMemberObject);
+    if (loggedInMemberObject === null) {
+      alert('請先登入');
+      this.$router.push('/login');
+    } else {
+      const role = loggedInMemberObject.authentication;
+      console.log(role);
+      console.log(role);
+      if (role == '1' || role == '0') {
+         // alert('歡迎回來，管理者!!');
+      } else {
+       alert('權限不足');
+        this.$router.push('/');
+      }
+    }
     axios.get(`${this.API_URL}/products/getProductByCategoryId?categoryId=A`)
       .then(response => {
         this.products = response.data;
@@ -412,8 +432,8 @@ export default {
 
 .btn-add {
   position: absolute;
-  top: 90px;
-  right: 95PX;
+  top: 70px;
+  right: 75PX;
   margin: 10px;
   /* 调整按钮与表格的间距 */
 }
@@ -468,10 +488,13 @@ export default {
   margin-right: 0px;
   /* 設定按鈕的右邊距 */
 }
+
 .table thead th {
   position: sticky;
   top: 0;
-  z-index: 2; /* 確保標題行在上方 */
-  background-color: #fff; /* 可以選擇性地設置背景色 */
+  z-index: 2;
+  /* 確保標題行在上方 */
+  background-color: #fff;
+  /* 可以選擇性地設置背景色 */
 }
 </style>

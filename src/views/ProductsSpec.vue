@@ -151,6 +151,7 @@ export default {
         color: '',
         stockQuantity: '',
       },
+      newProductId: '',
 
 
     };
@@ -163,18 +164,55 @@ export default {
     this.fetchData();
   },
   methods: {
+    print() {
+      console.log(sessionStorage.getItem("x"));
+    },
+
+    // fetchData() {
+    //   this.loading = true; // 設置 loading 為 true，顯示“加載中...”的訊息
+    //   axios.get(`${this.API_URL}/products/findProductSpecByProductId?productId=${this.x}`)
+    //     .then(response => {
+    //       this.productSpecs = response.data;
+    //       this.loading = false; // 加載完成後設置 loading 為 false
+    //     })
+    //     .catch(error => {
+    //       console.error('获取产品规格时出错:', error);
+    //       this.loading = false; // 發生錯誤時設置 loading 為 false
+    //       this.error = true; // 設置 error 為 true，顯示錯誤訊息
+    //     });
+    // },
     fetchData() {
-    this.loading = true; // 設置 loading 為 true，顯示“加載中...”的訊息
-    axios.get(`${this.API_URL}/products/findProductSpecByProductId?productId=${this.x}`)
-      .then(response => {
-        this.productSpecs = response.data;
-        this.loading = false; // 加載完成後設置 loading 為 false
-      })
-      .catch(error => {
-        console.error('获取产品规格时出错:', error);
-        this.loading = false; // 發生錯誤時設置 loading 為 false
-        this.error = true; // 設置 error 為 true，顯示錯誤訊息
-      });
+      const loggedInMember = sessionStorage.getItem('loggedInMember');
+    const loggedInMemberObject = JSON.parse(loggedInMember);
+    console.log(loggedInMemberObject);
+    if (loggedInMemberObject === null) {
+      alert('請先登入');
+      this.$router.push('/login');
+    } else {
+      const role = loggedInMemberObject.authentication;
+      console.log(role);
+      console.log(role);
+      if (role == '1' || role == '0') {
+         // alert('歡迎回來，管理者!!');
+      } else {
+       alert('權限不足');
+        this.$router.push('/');
+      }
+    }
+      this.x = sessionStorage.getItem("x")
+      this.y = sessionStorage.getItem("y")
+      this.z = sessionStorage.getItem("z")
+      this.loading = true; // 設置 loading 為 true，顯示“加載中...”的訊息
+      axios.get(`${this.API_URL}/products/findProductSpecByProductId?productId=${this.x}`)
+        .then(response => {
+          this.productSpecs = response.data;
+          this.loading = false; // 加載完成後設置 loading 為 false
+        })
+        .catch(error => {
+          console.error('获取产品规格时出错:', error);
+          this.loading = false; // 發生錯誤時設置 loading 為 false
+          this.error = true; // 設置 error 為 true，顯示錯誤訊息
+        });
     },
 
     openaddModal() {
@@ -188,7 +226,7 @@ export default {
       this.$refs.addModal.classList.remove('show');
       this.$refs.addModal.style.display = 'none';
       // document.body.classList.remove('modal-open');
-      this.resetFormData()
+      // this.resetFormData()
     },
     openquantityModal() {
       this.$refs.quantityModal.classList.add('show');
@@ -200,7 +238,7 @@ export default {
       this.$refs.quantityModal.classList.remove('show');
       this.$refs.quantityModal.style.display = 'none';
       // document.body.classList.remove('modal-open');
-      this.resetFormData()
+      // this.resetFormData()
     },
     resetFormData() {
       this.NewProductSpec = {
@@ -216,13 +254,18 @@ export default {
     },
     saveProductSpec() {
       console.log(this.NewProductSpec);
+      this.x = this.$route.query.x
+            console.log(this.x)
+      sessionStorage.setItem("x",this.x) ; 
       if (confirm('確定要新增嗎?')) {
         axios.post(`${this.API_URL}/products/insertProductSpec`, this.NewProductSpec)
           .then(response => {
-            console.log(response.data);
-
-            this.closeaddModal();
+            console.log("123");
+        
+            // this.closeaddModal();
+        
             this.fetchData();
+         
           })
           .catch(error => {
             console.error('Error:', error);
@@ -233,6 +276,9 @@ export default {
         console.log('取消保存');
       }
     },
+    refreshWindow() {
+      window.location.reload();
+    },
     changProductSpecQuantity() {
       console.log(this.selectedProductSpec);
       if (confirm('確定要修改嗎?')) {
@@ -242,6 +288,7 @@ export default {
             console.log(response.data);
 
             this.closequantityModal();
+
             this.fetchData();
           })
           .catch(error => {
