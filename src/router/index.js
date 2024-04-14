@@ -63,6 +63,10 @@ const router = new createRouter({
       path: "/test",
       component: () => import("@/views/Test.vue"),
     },
+    {
+      path:"/feedback",
+      component: () => import("@/views/Feedback.vue"),
+    }
   ],
 });
 

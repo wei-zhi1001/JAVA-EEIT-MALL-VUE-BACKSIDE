@@ -383,7 +383,7 @@ export default {
     axios.get(`${this.API_URL}/products/getProductByCategoryId?categoryId=A`)
       .then(response => {
         this.products = response.data;
-        this.search();
+        this.search(); 
       })
       .catch(error => {
         console.error('Error fetching products:', error);
