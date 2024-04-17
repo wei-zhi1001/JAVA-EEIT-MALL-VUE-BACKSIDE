@@ -1,5 +1,7 @@
 <template>
   <main class="container">
+    <input type="text" v-model="searchTerm" class="form-control" placeholder="搜尋用戶">
+
     <table class="table table-striped table-hover">
       <thead>
         <tr class="text-center">
@@ -15,7 +17,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(member, index) in members" :key="index"
+        <tr v-for="(member, index) in filteredmembers" :key="index"
           :class="{ 'text-center': true, 'front.red': member.authentication === 3 }">
           <td>{{ member.userId }}</td>
           <td>{{ member.userName }}</td>
@@ -66,7 +68,7 @@
                       readonly>
                   </div>
                   <div>
-                    <label for="providerName">提供者名稱:</label>
+                    <label for="providerName">綁定平台:</label>
                     <input type="text" class="form-control" :id="'providerName' + index" v-model="provider.providerName"
                       readonly>
                   </div>
@@ -123,10 +125,42 @@ export default {
     return {
       members: [],// 将数据保存在数组中
       newMember: [],
+      searchTerm: '', // 定義搜索條件的數據屬性
+      filteredmembers: [] // 定義過濾後的成員數組的數據屬性
 
     };
   },
+  watch: {
+    searchTerm(newValue) {
+      this.search();
+      console.log(newValue);
+    },
+  },
   methods: {
+    search() {
+  // 根據搜索條件過濾產品列表
+  if (this.searchTerm.trim() === '') {
+    // 如果搜索條件為空，顯示所有產品
+    this.filteredmembers = this.members;
+    console.log(this.filteredmembers);
+    console.log('成功搜尋');
+  } else {
+    // 否則，過濾產品列表
+    this.filteredmembers = this.members.filter(member => {
+      const userName = member.userName?.toLowerCase() || '';
+      const email = member.email?.toLowerCase() || '';
+      const phone = member.phone?.toString() || '';
+      const searchTerm = this.searchTerm.toLowerCase();
+      
+      return userName.includes(searchTerm) ||
+      email.toString().includes(searchTerm) ||
+      phone.includes(searchTerm)
+           ;
+    });
+
+    console.log(this.filteredmembers);
+  }
+},
     ban(member) {
       console.log(member.userId)
       axios.put(`${this.API_URL}/user/banUser?id=${member.userId}`).then((rs) => {
@@ -155,7 +189,8 @@ export default {
     },
     getmemebers() {
       axios.get(`${this.API_URL}/user/getAllUsers`).then((rs) => {
-        this.members = rs.data; // 将获取的数据存储在数组中
+        this.members = rs.data; // 将获取的数据存储在数组中    
+        this.filteredmembers=this.members
       })
     },
     openModal(member) {
@@ -181,7 +216,7 @@ export default {
     },
   },
   computed: {
-
+   
 
   },
   created() {
@@ -202,8 +237,10 @@ export default {
         this.$router.push('/');
       }
     }
-    this.getmemebers();
+   this.getmemebers();
+this.filteredmembers=this.members
 
+   
   }
 }
 

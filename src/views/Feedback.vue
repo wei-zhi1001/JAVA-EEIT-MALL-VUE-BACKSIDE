@@ -1,7 +1,7 @@
 <template>
   <main class="container">
-    <button @click="showUnread" class="red" v-if="unread== false ">顯示未處理</button>
-    <button @click="getfeedbacks" class="red" v-else="unread== true ">顯示全部</button>
+    <button @click="showUnread" class="btn btn-primary" v-if="unread== false" style="background-color: red;">顯示未處理</button>
+    <button @click="getfeedbacks" class="btn btn-primary" v-else="unread== true ">顯示全部</button>
     <table class="table table-striped table-hover">
       <thead>
         <tr class="text-center">

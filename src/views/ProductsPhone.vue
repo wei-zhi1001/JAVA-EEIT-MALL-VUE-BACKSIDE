@@ -92,8 +92,8 @@
             </div>
             <div class="form-group">
               <label for="productDescription">產品特性:</label>
-              <input type="textarea" class="form-control h-200" id="productDescription"
-                v-model="NewProduct.productDescription">
+              <input type="text" class="form-control h-200" id="productDescription"
+                     v-model="NewProduct.productDescription">
             </div>
             <div class="form-group">
               <label for="price">價格(元):</label>
@@ -208,6 +208,7 @@ export default {
   watch: {
     searchTerm(newValue) {
       this.search();
+      console.log(newValue);
     },
   },
   methods: {
@@ -215,7 +216,7 @@ export default {
       console.log();
       if (confirm("您確定要刪除這筆產品嗎？")) {
         axios.delete(`${this.API_URL}/products/deleteProduct?productId=${product.productId}`)
-          .then(response => {
+          .then(() => {
             this.products = this.products.filter(p => p !== product);
             console.log('刪除成功');
             this.$router.go();
@@ -228,6 +229,7 @@ export default {
     },
 
     redirectToSpec(product) {
+      sessionStorage.setItem('productId', product.productId);
       sessionStorage.setItem('x', product.productId);
       sessionStorage.setItem('y', product.productName);
       sessionStorage.setItem('z', product.price);
@@ -242,24 +244,29 @@ export default {
     },
 
     search() {
-      // 根據搜索條件過濾產品列表
-      if (this.searchTerm.trim() === '') {
-        // 如果搜索條件為空，顯示所有產品
-        this.filteredProducts = this.products;
-        console.log('成功搜尋');
-      } else {
-        // 否則，過濾產品列表
-        this.filteredProducts = this.products.filter(product =>
-          product.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.price.toString().includes(this.searchTerm) ||
-          product.size.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product.productId.toString().includes(this.searchTerm)
+  // 根據搜索條件過濾產品列表
+  if (this.searchTerm.trim() === '') {
+    // 如果搜索條件為空，顯示所有產品
+    this.filteredProducts = this.products;
+    console.log('成功搜尋');
+  } else {
+    // 否則，過濾產品列表
+    this.filteredProducts = this.products.filter(product => {
+      const productName = product.productName?.toLowerCase() || '';
+      const size = product.size?.toLowerCase() || '';
+      const productId = product.productId?.toString() || '';
+      const searchTerm = this.searchTerm.toLowerCase();
+      
+      return productName.includes(searchTerm) ||
+             product.price.toString().includes(searchTerm) ||
+             size.includes(searchTerm) ||
+             productId.includes(searchTerm);
+    });
 
+    console.log(this.filteredProducts);
+  }
+},
 
-        );
-
-      }
-    },
     saveProduct() {
       // 保存产品前先显示二次确认提示
       if (confirm("您確定要新增這筆產品嗎？")) {
@@ -269,8 +276,14 @@ export default {
           .then(response => {
             this.resetFormData(); // 清空表单数据
             console.log(response.data);
-            this.fetchData();
-            this.closeModal();
+            this.showLoadingAnimation
+          
+            setTimeout(() => {
+              this.hideLoadingAnimation();
+              this.closeModal();
+              this.fetchData();
+            }, 1000);
+           
           })
           .catch(error => {
             console.error('Error:', error);
@@ -360,7 +373,41 @@ export default {
       };
       const dateTime = new Date(dateTimeString);
       return dateTime.toLocaleString('zh-TW', options);
-    }
+    },
+    showLoadingAnimation() {
+      // 創建一個新的<div>元素來顯示等待動畫
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'loadingDiv';
+      loadingDiv.style.position = 'fixed';
+      loadingDiv.style.top = '50%';
+      loadingDiv.style.left = '50%';
+      loadingDiv.style.transform = 'translate(-50%, -50%)';
+      loadingDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      loadingDiv.style.padding = '20px';
+      loadingDiv.style.borderRadius = '10px';
+
+      // 添加旋轉圖示
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner-border text-primary';
+      spinner.style.width = '3rem';
+      spinner.style.height = '3rem';
+      spinner.style.display = 'block';
+      spinner.style.margin = 'auto';
+
+      // 將旋轉圖示添加到loadingDiv中
+      loadingDiv.appendChild(spinner);
+
+      // 將loadingDiv添加到body中
+      document.body.appendChild(loadingDiv);
+    },
+
+    hideLoadingAnimation() {
+      // 從DOM中移除loadingDiv元素
+      const loadingDiv = document.getElementById('loadingDiv');
+      if (loadingDiv) {
+        loadingDiv.parentNode.removeChild(loadingDiv);
+      }
+    },
   },
   created() {
     const loggedInMember = sessionStorage.getItem('loggedInMember');

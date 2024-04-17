@@ -1,49 +1,70 @@
 <template>
   <main class="container">
-    <div>
-      <h3>產品編號:{{ x }}<br>產品名稱:{{ y }}<br>售價:{{ z }}
-        <router-link :to="{ path: '/products/uploadPhotos' }"> 上傳照片</router-link>
-        <router-link :to="{ path: '/products/ShowPhoto' }"> 顯示照片</router-link>
 
-        <button @click="openaddModal">新增樣式</button>
-        <button @click="openquantityModal">庫存管理</button>
-      </h3>
+    <h3>產品編號: {{ x }}<br>產品名稱: {{ y }}<br>售價: {{ z }}</h3>
+    <div v-if="showSuccessMessage" class="success-message">
+      圖片上傳成功！
     </div>
-    <table class="table table-striped table-hover">
-      <thead>
-        <tr class="text-center">
-          <th scope="col">款式編號</th>
-          <th scope="col">顏色</th>
-          <th scope="col">庫存</th>
-          <th scope="col">刪除</th>
-
-        </tr>
-      </thead>
-      <tbody v-if="loading">
-        <tr>
-          <td colspan="3" class="text-center">加载中...</td>
-        </tr>
-      </tbody>
-      <tbody v-else-if="error">
-        <tr>
-          <td colspan="3" class="text-center">获取数据时出错</td>
-        </tr>
-      </tbody>
-      <tbody v-else>
-        <tr v-for="(spec, index) in productSpecs" :key="index" class="text-center">
-          <td>{{ spec.specId }}</td>
-          <td>{{ spec.color }}</td>
-          <td>{{ spec.stockQuantity }}</td>
 
 
-          <td><button @click="deleteProductSpec(spec)"><i class="fas fa-trash"></i></button></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="mb-3 d-flex justify-content-center">
+
+
+      <button @click="openaddModal" class="btn btn-primary">新增樣式</button>
+      <button @click="openaddModal" class="btn btn-outline-primary"
+        style="background-color: transparent; border-color: transparent; color: transparent;">新</button>
+
+      <button @click="openquantityModal" class="btn btn-primary ml-2">庫存管理</button>
+
+    </div>
+    <div>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr class="text-center">
+            <th scope="col">款式編號</th>
+            <th scope="col">顏色</th>
+            <th scope="col">庫存</th>
+
+
+            <th scope="col" style="text-align: right;">
+            <th scope="col">&nbsp;刪除</th>
+            <!-- <th scope="col">    </th> -->
+            <th scope="col">&nbsp;&nbsp;照片</th>
+            </th>
+          </tr>
+        </thead>
+        <tbody v-if="loading">
+          <tr>
+            <td colspan="3" class="text-center">加载中...</td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="error">
+          <tr>
+            <td colspan="3" class="text-center">获取数据时出错</td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="(spec, index) in productSpecs" :key="index" class="text-center">
+            <td>{{ spec.specId }}</td>
+            <td>{{ spec.color }}</td>
+            <td>{{ spec.stockQuantity }}</td>
+
+            <td style="text-align: right;">
+            <td><button @click="deleteProductSpec(spec)" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+            </td>
+            <!-- <td></td> -->
+            <td><button @click="openPhotoModal(spec)" class="btn btn-primary"><i
+                  class="fa-regular fa-image"></i></button></td>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
 
 
     <!-- Modal -->
-    <div class="modal" tabindex="-1" role="dialog" ref="addModal">
+    <div class="modal fade" role="dialog" ref="addModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -69,9 +90,14 @@
                 <label for="stockQuantity">數量</label>
                 <input type="text" class="form-control" id="stockQuantity" v-model="NewProductSpec.stockQuantity">
               </div>
+              <br>
+              <label for="file">選擇圖片:</label>
+              <input type="file" id="file" ref="file" @change="handleFileChange" required>
+              <br>
+
               <div class="d-flex justify-content-end">
                 <button type="button" class="btn btn-secondary" @click="closeaddModal">Close</button>
-                <button type="submit" class="btn btn-primary ml-2" @click="saveProductSpec">save</button>
+                <button type="button" class="btn btn-primary ml-2" @click="saveProductSpec">save</button>
               </div>
             </form>
 
@@ -83,7 +109,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal" tabindex="-1" role="dialog" ref="quantityModal">
+    <div class="modal fade" role="dialog" ref="quantityModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -95,12 +121,13 @@
           <div class="modal-body">
             <form>
               <div class="form-group">
-                <select v-model="selectedProductSpec">
+                <p>產品編號: </p>
+                <select v-model="selectedProductSpec" class="form-control">
                   <option v-for="productSpec in productSpecs" :key="productSpec.specId" :value="productSpec">
                     {{ productSpec.specId }}
                   </option>
                 </select>
-                <p>產品編號: {{ selectedProductSpec.specId }}</p>
+                <p></p>
               </div>
 
               <div class="form-group">
@@ -110,7 +137,7 @@
                 <label for="stockQuantity">數量</label>
                 <input type="text" class="form-control" id="stockQuantity" v-model="selectedProductSpec.stockQuantity">
               </div>
-
+              <br />
               <div class="d-flex justify-content-end"> <!-- 新添加的 div -->
                 <button type="button" class="btn btn-secondary" @click="closequantityModal">Close</button>
                 <button type="submit" class="btn btn-primary ml-2" @click="changProductSpecQuantity">Save</button>
@@ -118,6 +145,34 @@
             </form>
           </div>
           <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" role="dialog" ref="photoModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">款式編號: {{ this.photo.specId }}</h5>
+            <button type="button" class="close" aria-label="Close" @click="closePhotoModal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <img :src="`http://localhost:8080/mall/productSpec/photo/${this.photo.specId}`" class="card-img-top"
+              alt="Product Image" style="height: 300px; width: 100%; object-fit: contain " />
+            <label v-if="changePhoto == true" for="file">選擇圖片:</label>
+            <input v-if="changePhoto == true" type="file" id="file" ref="file" @change="handleFileChange" required>
+          </div>
+          <div class="modal-footer">
+
+            <button v-if="changePhoto == true" type="button" class="btn btn-primary" @click="updatePhoto">Save
+              Photo</button>
+            <button v-if="changePhoto == false" type="button" class="btn btn-primary" @click="changePhotoAction">Change
+              Photo</button>
+            <button type="button" class="btn btn-secondary" @click="closePhotoModal">Close</button>
           </div>
         </div>
       </div>
@@ -135,24 +190,22 @@ import axios from 'axios';
 export default {
   data() {
     return {
+      specId: '',
+      file: null,
+      showSuccessMessage: false,
+      showErrorMessage: false,
       x: this.$route.query.x,
       y: this.$route.query.y,
       z: this.$route.query.z,
       productSpecs: [],
       loading: false,
       error: false,
-      NewProductSpec: {
-        specId: '',
-        color: '',
-        stockQuantity: '',
-      },
-      selectedProductSpec: {
-        specId: '',
-        color: '',
-        stockQuantity: '',
-      },
+      NewProductSpec:[],
+      selectedProductSpec: [],
       newProductId: '',
-
+      specPhoto: [],
+      photo: [],
+      changePhoto: false,
 
     };
   },
@@ -183,23 +236,24 @@ export default {
     // },
     fetchData() {
       const loggedInMember = sessionStorage.getItem('loggedInMember');
-    const loggedInMemberObject = JSON.parse(loggedInMember);
-    console.log(loggedInMemberObject);
-    if (loggedInMemberObject === null) {
-      alert('請先登入');
-      this.$router.push('/login');
-    } else {
-      const role = loggedInMemberObject.authentication;
-      console.log(role);
-      console.log(role);
-      if (role == '1' || role == '0') {
-         // alert('歡迎回來，管理者!!');
+      const loggedInMemberObject = JSON.parse(loggedInMember);
+      console.log(loggedInMemberObject);
+      if (loggedInMemberObject === null) {
+        alert('請先登入');
+        this.$router.push('/login');
       } else {
-       alert('權限不足');
-        this.$router.push('/');
+        const role = loggedInMemberObject.authentication;
+        console.log(role);
+        console.log(role);
+        if (role == '1' || role == '0') {
+          // alert('歡迎回來，管理者!!');
+        } else {
+          alert('權限不足');
+          this.$router.push('/');
+        }
       }
-    }
-      this.x = sessionStorage.getItem("x")
+      this.x = sessionStorage.getItem("productId")
+      // this.x = sessionStorage.getItem("x")
       this.y = sessionStorage.getItem("y")
       this.z = sessionStorage.getItem("z")
       this.loading = true; // 設置 loading 為 true，顯示“加載中...”的訊息
@@ -255,17 +309,25 @@ export default {
     saveProductSpec() {
       console.log(this.NewProductSpec);
       this.x = this.$route.query.x
-            console.log(this.x)
-      sessionStorage.setItem("x",this.x) ; 
+      console.log(this.x)
+      sessionStorage.setItem("x", this.x);
+      console.log(this.NewProductSpec.specId);
+      console.log(this.file);
+
       if (confirm('確定要新增嗎?')) {
         axios.post(`${this.API_URL}/products/insertProductSpec`, this.NewProductSpec)
           .then(response => {
             console.log("123");
-        
+
+            console.log(response.data);
+            // this.uploadPhoto();
+            alert("新增成功");
+
             // this.closeaddModal();
-        
-            this.fetchData();
-         
+            this.uploadPhoto();
+
+            // this.fetchData();
+
           })
           .catch(error => {
             console.error('Error:', error);
@@ -317,7 +379,102 @@ export default {
         alert('已取消刪除');
       }
     },
+    handleFileChange(event) {
+      this.file = event.target.files[0];
+    },
+    uploadPhoto() {
+      let formData = new FormData();
+      formData.append('specId', this.NewProductSpec.specId);
+      formData.append('file', this.file);
 
+      axios.post(`${this.API_URL}/products/insertProductPhoto`, formData)
+        .then(response => {
+          console.log(response.data); // Success message from server
+          // Show success message
+          this.showSuccessMessage = true;
+          // Hide success message after 3 seconds
+          this.closeaddModal();
+          this.fetchData();
+
+          setTimeout(() => {
+            this.showSuccessMessage = false;
+          }, 1000);
+        })
+        .catch(error => {
+          console.error('There was a problem with the axios operation:', error);
+          // Show error message
+          this.showErrorMessage = true;
+          // Hide error message after 3 seconds
+          setTimeout(() => {
+            this.showErrorMessage = false;
+          }, 3000);
+        });
+    },
+    showLoadingAnimation() {
+      // 創建一個新的<div>元素來顯示等待動畫
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'loadingDiv';
+      loadingDiv.style.position = 'fixed';
+      loadingDiv.style.top = '50%';
+      loadingDiv.style.left = '50%';
+      loadingDiv.style.transform = 'translate(-50%, -50%)';
+      loadingDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      loadingDiv.style.padding = '20px';
+      loadingDiv.style.borderRadius = '10px';
+
+      // 添加旋轉圖示
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner-border text-primary';
+      spinner.style.width = '3rem';
+      spinner.style.height = '3rem';
+      spinner.style.display = 'block';
+      spinner.style.margin = 'auto';
+
+      // 將旋轉圖示添加到loadingDiv中
+      loadingDiv.appendChild(spinner);
+
+      // 將loadingDiv添加到body中
+      document.body.appendChild(loadingDiv);
+    },
+
+    hideLoadingAnimation() {
+      // 從DOM中移除loadingDiv元素
+      const loadingDiv = document.getElementById('loadingDiv');
+      if (loadingDiv) {
+        loadingDiv.parentNode.removeChild(loadingDiv);
+      }
+    },
+
+    openPhotoModal(spec) {
+      this.photo = spec;
+      this.$refs.photoModal.classList.add('show');
+      this.$refs.photoModal.style.display = 'block';
+    },
+    closePhotoModal() {
+      this.photo = null;
+      this.changePhoto = false;
+      this.$refs.photoModal.classList.remove('show');
+      this.$refs.photoModal.style.display = 'none';
+      this.$router.go();
+    },
+    changePhotoAction() {
+      console.log(this.changePhoto);
+      this.changePhoto = true;
+      console.log(this.changePhoto);
+    },
+    updatePhoto() {
+      let formData = new FormData();
+            formData.append('specId', this.photo.specId);
+            formData.append('file', this.file);
+      if (confirm('確定要修改嗎?')) {
+        axios.put(`${this.API_URL}/products/changeSpecPhoto`, formData).then(response => {
+          console.log(response.data);
+          this.closePhotoModal();
+          this.fetchData();
+        
+        })
+      }
+    }
 
 
   }
@@ -326,13 +483,21 @@ export default {
 </script>
 
 <style>
-.table button:hover {
-  background-color: var(--primary-color);
-  color: #fff;
+.close {
+  position: absolute;
+  /* 相对于 .modal-header 定位 */
+  top: 10px;
+  /* 调整关闭按钮与顶部的距离 */
+  right: 10px;
+  /* 调整关闭按钮与右侧的距离 */
 }
 
-.table button {
-  margin-right: 0px;
-  /* 設定按鈕的右邊距 */
+.table-container {
+  display: flex;
+  justify-content: center;
+}
+
+.table-container table {
+  /* 添加任何您需要的其他樣式 */
 }
 </style>
