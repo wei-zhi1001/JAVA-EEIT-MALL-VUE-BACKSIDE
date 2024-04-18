@@ -1,44 +1,49 @@
 <template>
   <main class="container">
+    <h1>會員管理</h1>
+    <button type="button" class="btn btn-warning" @click=" showbanuser" v-if="banyesorno== false">顯示停權用戶</button>
+    <button type="button" class="btn btn-outline-dark" @click=" showbanuser" v-if="banyesorno== true">顯示所有用戶</button>
     <input type="text" v-model="searchTerm" class="form-control" placeholder="搜尋用戶">
-
-    <table class="table table-striped table-hover">
-      <thead>
-        <tr class="text-center">
-          <th scope="col">會員編號</th>
-          <th scope="col">會員名稱</th>
-          <th scope="col">e-mail</th>
-          <th scope="col">手機</th>
-          <th scope="col">會員狀態</th>
-          <th scope="col">註冊時間</th>
-          <th scope="col">上次登入時間</th>
-          <th scope="col">會員資料</th>
-          <th scope="col">停權</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(member, index) in filteredmembers" :key="index"
-          :class="{ 'text-center': true, 'front.red': member.authentication === 3 }">
-          <td>{{ member.userId }}</td>
-          <td>{{ member.userName }}</td>
-          <td>{{ member.email }}</td>
-          <td>{{ member.phone }}</td>
-          <td>
-            {{ member.authentication === 2 ? '一般會員' : (member.authentication === 1 ? '管理者' : (member.authentication ===
-              0 ? '系統管理員' : (member.authentication === 3 ? '已停權' : member.authentication))) }}
-          </td>
-          <td>{{ formatDate(member.registerDate) }}</td>
-          <td>{{ formatDate(member.lastLoginTime) }}</td>
-          <td><button @click="openModal(member)"><i class="fa-solid fa-user-pen"></i></button></td>
-          <td>
-            <button v-if="member.authentication == 2" @click="ban(member)">
-              <i class="fa-solid fa-ban"></i></button>
-            <button v-else @click="unban(member)">
-              <i class="fa-solid fa-arrow-rotate-left"></i></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-frame">
+      <table class="table table-hover">
+        <thead>
+          <tr class="text-center">
+            <th scope="col">會員編號</th>
+            <th scope="col">會員名稱</th>
+            <th scope="col">e-mail</th>
+            <th scope="col">手機</th>
+            <th scope="col">會員狀態</th>
+            <th scope="col">註冊時間</th>
+            <th scope="col">上次登入時間</th>
+            <th scope="col">會員資料</th>
+            <th scope="col">停權</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(member, index) in filteredmembers" :key="index"
+            :class="{ 'text-center': true, 'front.red': member.authentication === 3 }">
+            <td>{{ member.userId }}</td>
+            <td>{{ member.userName }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.phone }}</td>
+            <td>
+              {{ member.authentication === 2 ? '一般會員' : (member.authentication === 1 ? '管理者' : (member.authentication
+                ===
+                0 ? '系統管理員' : (member.authentication === 3 ? '已停權' : member.authentication))) }}
+            </td>
+            <td>{{ formatDate(member.registerDate) }}</td>
+            <td>{{ formatDate(member.lastLoginTime) }}</td>
+            <td><button @click="openModal(member)"><i class="fa-solid fa-user-pen"></i></button></td>
+            <td>
+              <button v-if="member.authentication == 2" @click="ban(member)">
+                <i class="fa-solid fa-ban"></i></button>
+              <button v-else @click="unban(member)">
+                <i class="fa-solid fa-arrow-rotate-left"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
   <!-- Modal -->
   <div class="modal" tabindex="-1" role="dialog" ref="modal">
@@ -107,7 +112,7 @@
             </div>
             <div class="d-flex justify-content-end">
               <button type="button" class="btn btn-secondary mr-2" @click="closeModal">Close</button>
-              <button type="button" class="btn btn-primary" @click="saveProduct">Save</button>
+              <button type="button" class="btn btn-primary" @click="saveMember">Save</button>
             </div>
           </form>
         </div>
@@ -126,7 +131,9 @@ export default {
       members: [],// 将数据保存在数组中
       newMember: [],
       searchTerm: '', // 定義搜索條件的數據屬性
-      filteredmembers: [] // 定義過濾後的成員數組的數據屬性
+      filteredmembers: [] ,// 定義過濾後的成員數組的數據屬性
+      banyesorno: false,
+
 
     };
   },
@@ -137,30 +144,51 @@ export default {
     },
   },
   methods: {
+    saveMember() {
+      this.newMember.userID = this.newMember.userId;
+      console.log(this.newMember);
+      axios.put(`${this.API_URL}/update/memberdataupdate`, this.newMember).then((rs) => {
+        console.log(rs.data);
+        alert('修改成功');
+      })
+    },
     search() {
-  // 根據搜索條件過濾產品列表
-  if (this.searchTerm.trim() === '') {
-    // 如果搜索條件為空，顯示所有產品
-    this.filteredmembers = this.members;
-    console.log(this.filteredmembers);
-    console.log('成功搜尋');
-  } else {
-    // 否則，過濾產品列表
-    this.filteredmembers = this.members.filter(member => {
-      const userName = member.userName?.toLowerCase() || '';
-      const email = member.email?.toLowerCase() || '';
-      const phone = member.phone?.toString() || '';
-      const searchTerm = this.searchTerm.toLowerCase();
-      
-      return userName.includes(searchTerm) ||
-      email.toString().includes(searchTerm) ||
-      phone.includes(searchTerm)
-           ;
-    });
+      // 根據搜索條件過濾產品列表
+      if (this.searchTerm.trim() === '') {
+        // 如果搜索條件為空，顯示所有產品
+        this.filteredmembers = this.members;
+        console.log(this.filteredmembers);
+        console.log('成功搜尋');
+      } else {
+        // 否則，過濾產品列表
+        this.filteredmembers = this.members.filter(member => {
+          const userName = member.userName?.toLowerCase() || '';
+          const email = member.email?.toLowerCase() || '';
+          const phone = member.phone?.toString() || '';
+          const searchTerm = this.searchTerm.toLowerCase();
+          
 
-    console.log(this.filteredmembers);
-  }
-},
+          return userName.includes(searchTerm) ||
+            email.toString().includes(searchTerm) ||
+            phone.includes(searchTerm)
+            ;
+        });
+
+        console.log(this.filteredmembers);
+      }
+    },
+    showbanuser() {
+      if(this.banyesorno == false){
+        
+        this.filteredmembers = this.members.filter(member => {
+          return member.authentication == '3';
+        })
+        this.banyesorno = true;
+      }else{
+        this.filteredmembers = this.members
+        this.banyesorno = false;
+      }
+    },
     ban(member) {
       console.log(member.userId)
       axios.put(`${this.API_URL}/user/banUser?id=${member.userId}`).then((rs) => {
@@ -190,7 +218,7 @@ export default {
     getmemebers() {
       axios.get(`${this.API_URL}/user/getAllUsers`).then((rs) => {
         this.members = rs.data; // 将获取的数据存储在数组中    
-        this.filteredmembers=this.members
+        this.filteredmembers = this.members
       })
     },
     openModal(member) {
@@ -216,7 +244,7 @@ export default {
     },
   },
   computed: {
-   
+
 
   },
   created() {
@@ -231,21 +259,27 @@ export default {
       console.log(role);
       console.log(role);
       if (role == '1' || role == '0') {
-         // alert('歡迎回來，管理者!!');
+        // alert('歡迎回來，管理者!!');
       } else {
-       alert('權限不足');
+        alert('權限不足');
         this.$router.push('/');
       }
     }
-   this.getmemebers();
-this.filteredmembers=this.members
+    this.getmemebers();
+    this.filteredmembers = this.members;
+    // this.banyesorno = false;
 
-   
+
   }
 }
 
 </script>
-<style>
+<style scoped>
+/* .container {
+  max-width: 95%;
+  overflow-x: auto;  啟用水平捲動
+} */
+
 .custom-link {
   background-color: transparent;
   /* 背景透明 */
@@ -282,12 +316,21 @@ this.filteredmembers=this.members
   /* 水平居中 */
 }
 
-.btn-add {
+.btn-outline-dark {
   position: absolute;
   top: 70px;
-  right: 75PX;
+  right: 65px;
   margin: 10px;
   /* 调整按钮与表格的间距 */
+  border: 2px solid black;
+}
+.btn-warning {
+  position: absolute;
+  top: 70px;
+  right: 65px;
+  margin: 10px;
+  /* 调整按钮与表格的间距 */
+  /* border: 2px solid black; */
 }
 
 .modal-header {
@@ -304,12 +347,25 @@ this.filteredmembers=this.members
   /* 调整关闭按钮与右侧的距离 */
 }
 
-.table thead th {
-  white-space: nowrap;
+.table-frame {
+  border: 3px solid #ADADAD;
+  border-radius: 10px;
+  padding: 10px 30px;
 }
 
-.table tbody th {
+.table thead th {
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* 確保標題行在上方 */
+  background-color: #ffffff;
+  /* 可以選擇性地設置背景色 */
+}
+
+.table tbody td {
+  white-space: normal;
+  vertical-align: middle;
 }
 
 /* 定義主顏色 */
@@ -319,11 +375,11 @@ this.filteredmembers=this.members
 
 /* 定義按鈕樣式 */
 .table button {
-  border: 1px solid var(--primary-color);
+  border: 1px solid #5B5B5B;
   border-radius: 20px;
   padding: 6px 12px;
   background-color: transparent;
-  color: var(--primary-color);
+  color: #5B5B5B;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
@@ -332,8 +388,8 @@ this.filteredmembers=this.members
 
 /* 按鈕懸停時變化 */
 .table button:hover {
-  background-color: var(--primary-color);
-  color: #fff;
+  background-color: #5B5B5B;
+  color: #E0E0E0;
 }
 
 .table button {
@@ -341,17 +397,21 @@ this.filteredmembers=this.members
   /* 設定按鈕的右邊距 */
 }
 
-.table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  /* 確保標題行在上方 */
-  background-color: #fff;
-  /* 可以選擇性地設置背景色 */
+.actionButton {
+  color: black;
+  border-color: black;
+  transition: color 0.3s, border-color 0.3s;
+  /* 添加過渡效果 */
 }
 
-.front.red {
-  color: red;
-  font-weight: bold;
+.actionButton:hover {
+  color: gray;
+  /* 滑鼠移上時改變顏色 */
 }
+
+.actionButton:active {
+  color: darkgray;
+  /* 按下按鈕時改變顏色 */
+}
+
 </style>

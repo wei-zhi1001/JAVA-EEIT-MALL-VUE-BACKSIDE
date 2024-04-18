@@ -10,27 +10,27 @@
     <div class="mb-3 d-flex justify-content-center">
 
 
-      <button @click="openaddModal" class="btn btn-primary">新增樣式</button>
+      <button @click="openaddModal" class="btn btn-outline-dark">新增樣式</button>
       <button @click="openaddModal" class="btn btn-outline-primary"
         style="background-color: transparent; border-color: transparent; color: transparent;">新</button>
 
-      <button @click="openquantityModal" class="btn btn-primary ml-2">庫存管理</button>
+      <button @click="openquantityModal" class="btn btn-outline-dark ml-2 " style="right: 165px;">庫存管理</button>
 
     </div>
-    <div>
-      <table class="table table-striped table-hover">
+    <div class="table-frame">
+      <table class="table table-hover">
         <thead>
           <tr class="text-center">
             <th scope="col">款式編號</th>
             <th scope="col">顏色</th>
-            <th scope="col">庫存</th>
+            <th scope="col" >庫存</th>
 
 
-            <th scope="col" style="text-align: right;">
+          
             <th scope="col">&nbsp;刪除</th>
-            <!-- <th scope="col">    </th> -->
+
             <th scope="col">&nbsp;&nbsp;照片</th>
-            </th>
+           
           </tr>
         </thead>
         <tbody v-if="loading">
@@ -49,13 +49,13 @@
             <td>{{ spec.color }}</td>
             <td>{{ spec.stockQuantity }}</td>
 
-            <td style="text-align: right;">
+           
             <td><button @click="deleteProductSpec(spec)" class="btn btn-danger"><i class="fas fa-trash"></i></button>
             </td>
             <!-- <td></td> -->
             <td><button @click="openPhotoModal(spec)" class="btn btn-primary"><i
                   class="fa-regular fa-image"></i></button></td>
-            </td>
+          
           </tr>
         </tbody>
       </table>
@@ -91,8 +91,10 @@
                 <input type="text" class="form-control" id="stockQuantity" v-model="NewProductSpec.stockQuantity">
               </div>
               <br>
-              <label for="file">選擇圖片:</label>
+
+              <label for="file" >選擇圖片: </label>
               <input type="file" id="file" ref="file" @change="handleFileChange" required>
+              
               <br>
 
               <div class="d-flex justify-content-end">
@@ -163,8 +165,11 @@
           <div class="modal-body">
             <img :src="`http://localhost:8080/mall/productSpec/photo/${this.photo.specId}`" class="card-img-top"
               alt="Product Image" style="height: 300px; width: 100%; object-fit: contain " />
+          <!-- <div v-if="changePhoto == true " style="border: 2px solid black padding: 10px"> -->
             <label v-if="changePhoto == true" for="file">選擇圖片:</label>
+            <br/>
             <input v-if="changePhoto == true" type="file" id="file" ref="file" @change="handleFileChange" required>
+          <!-- </div> -->
           </div>
           <div class="modal-footer">
 
@@ -482,7 +487,62 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
+/* .container {
+  max-width: 95%;
+  overflow-x: auto;  啟用水平捲動
+} */
+
+.custom-link {
+  background-color: transparent;
+  /* 背景透明 */
+  color: black;
+  /* 文字颜色 */
+  /* padding: 7px; */
+  /* 设置内边距 */
+  display: inline-block;
+  /* 让链接变成行内块元素，以便控制宽度和高度 */
+  position: relative;
+  /* 使得子元素的绝对定位相对于父元素 */
+  text-decoration: none;
+  /* 移除下划线 */
+  transition: color 0.3s;
+  /* 添加文字颜色的过渡效果 */
+  /* top: 10px; */
+}
+
+.custom-link:hover {
+  color: gray;
+  /* 鼠标移上去时文字颜色变为灰色 */
+}
+
+.custom-link b-icon {
+  display: block;
+  /* 将图标变为块级元素 */
+  position: absolute;
+  /* 绝对定位，以便于控制位置 */
+  top: -10px;
+  /* 将图标上移 */
+  left: 50%;
+  /* 水平居中 */
+  transform: translateX(-50%);
+  /* 水平居中 */
+}
+
+.btn-outline-dark {
+  position: absolute;
+  top: 150px;
+  right: 65px;
+  margin: 10px;
+  /* 调整按钮与表格的间距  */
+  border: 2px solid black;
+}
+
+.modal-header {
+  position: relative;
+  /* 使得 .modal-header 成为定位上下文 */
+}
+
 .close {
   position: absolute;
   /* 相对于 .modal-header 定位 */
@@ -492,12 +552,70 @@ export default {
   /* 调整关闭按钮与右侧的距离 */
 }
 
-.table-container {
-  display: flex;
-  justify-content: center;
+.table-frame {
+  border: 3px solid #ADADAD;
+  border-radius: 10px;
+  padding: 10px 30px;
 }
 
-.table-container table {
-  /* 添加任何您需要的其他樣式 */
+.table thead th {
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* 確保標題行在上方 */
+  background-color: #ffffff;
+  /* 可以選擇性地設置背景色 */
+}
+
+.table tbody td {
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+/* 定義主顏色 */
+:root {
+  --primary-color: #007bff;
+}
+
+/* 定義按鈕樣式 */
+.table button {
+  border: 1px solid #5B5B5B;
+  border-radius: 20px;
+  padding: 6px 12px;
+  background-color: transparent;
+  color: #5B5B5B;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 按鈕懸停時變化 */
+.table button:hover {
+  background-color: #5B5B5B;
+  color: #E0E0E0;
+}
+
+.table button {
+  margin-right: 0px;
+  /* 設定按鈕的右邊距 */
+}
+
+.actionButton {
+  color: black;
+  border-color: black;
+  transition: color 0.3s, border-color 0.3s;
+  /* 添加過渡效果 */
+}
+
+.actionButton:hover {
+  color: gray;
+  /* 滑鼠移上時改變顏色 */
+}
+
+.actionButton:active {
+  color: darkgray;
+  /* 按下按鈕時改變顏色 */
 }
 </style>
