@@ -1,7 +1,12 @@
 <template>
   <main class="container">
     <h1>手機產品</h1>
-    <button type="button" class="btn btn-outline-dark btn-add" @click="openModal">新增</button> <!-- 移到表格外部 -->
+    <button type="button" class="btn btn-outline-dark btn-add" @click="openModal" style="  position: absolute;
+  top: 75px;
+  right: 65px;
+  margin: 10px;
+  /* 调整按钮与表格的间距 */
+  border: 2px solid black;">新增</button> <!-- 移到表格外部 -->
     <input type="text" v-model="searchTerm" class="form-control" placeholder="搜尋產品">
 
     <div class="table-frame">
@@ -47,7 +52,7 @@
             <td>
               <button v-if="product.salesStatus === 0" @click="changeSalesStatus(product.productId)"
                 class="actionButton">
-                <i class="fas fa-check"></i>
+                <i class="fa-solid fa-rotate-right"></i>
               </button>
               <button v-else @click="changeSalesStatus(product.productId)" class="actionButton">
                 <i class="fas fa-xmark"></i>
@@ -485,12 +490,7 @@ export default {
 }
 
 .btn-outline-dark {
-  position: absolute;
-  top: 75px;
-  right: 65px;
-  margin: 10px;
-  /* 调整按钮与表格的间距 */
-  border: 2px solid black;
+
 }
 
 .modal-header {

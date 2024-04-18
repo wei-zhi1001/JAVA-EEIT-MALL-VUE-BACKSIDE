@@ -99,7 +99,7 @@
 
               <div class="d-flex justify-content-end">
                 <button type="button" class="btn btn-secondary" @click="closeaddModal">Close</button>
-                <button type="button" class="btn btn-primary ml-2" @click="saveProductSpec">save</button>
+                <button type="button" class="btn btn-primary ml-2" @click="saveProductSpec">Save</button>
               </div>
             </form>
 
@@ -205,7 +205,9 @@ export default {
       productSpecs: [],
       loading: false,
       error: false,
-      NewProductSpec:[],
+      NewProductSpec: {
+        
+      },
       selectedProductSpec: [],
       newProductId: '',
       specPhoto: [],
@@ -312,12 +314,9 @@ export default {
       };
     },
     saveProductSpec() {
+      this.NewProductSpec.deleted=false;
       console.log(this.NewProductSpec);
-      this.x = this.$route.query.x
-      console.log(this.x)
-      sessionStorage.setItem("x", this.x);
-      console.log(this.NewProductSpec.specId);
-      console.log(this.file);
+   
 
       if (confirm('確定要新增嗎?')) {
         axios.post(`${this.API_URL}/products/insertProductSpec`, this.NewProductSpec)
