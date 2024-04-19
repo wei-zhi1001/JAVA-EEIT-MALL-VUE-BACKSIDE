@@ -233,15 +233,18 @@ export default {
       // 提示用戶確認是否回覆問題
       if (confirm("您確定要回覆這筆問題嗎？")) {
         this.showLoadingAnimation();
+
         // 使用axios發送POST請求
         axios.put(`${this.API_URL}/sendFeedbackEmail`, fd)
-          .then((response) => {
-            // 請求成功時的處理邏輯
+        .then((response) => {
+          // 請求成功時的處理邏輯
             console.log("回覆成功:", response.data);
             // 可以在這裡添加其他處理邏輯，例如提示用戶回覆成功
+            alert('回覆成功');
+            this.getfeedbacks();
+            this.hideLoadingAnimation();
             
 
-            this.getfeedbacks();
 
           })
           .catch((error) => {
