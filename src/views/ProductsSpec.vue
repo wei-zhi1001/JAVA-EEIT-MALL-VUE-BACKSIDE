@@ -12,7 +12,7 @@
 
       <button @click="openaddModal" class="btn btn-outline-dark">新增樣式</button>
       <button @click="openaddModal" class="btn btn-outline-primary"
-        style="background-color: transparent; border-color: transparent; color: transparent;">新</button>
+              style="background-color: transparent; border-color: transparent; color: transparent;">新</button>
 
       <button @click="openquantityModal" class="btn btn-outline-dark ml-2 " style="right: 165px;">庫存管理</button>
 
@@ -20,43 +20,43 @@
     <div class="table-frame">
       <table class="table table-hover">
         <thead>
-          <tr class="text-center">
-            <th scope="col">款式編號</th>
-            <th scope="col">顏色</th>
-            <th scope="col" >庫存</th>
+        <tr class="text-center">
+          <th scope="col">款式編號</th>
+          <th scope="col">顏色</th>
+          <th scope="col" >庫存</th>
 
 
-          
-            <th scope="col">&nbsp;刪除</th>
 
-            <th scope="col">&nbsp;&nbsp;照片</th>
-           
-          </tr>
+          <th scope="col">&nbsp;刪除</th>
+
+          <th scope="col">&nbsp;&nbsp;照片</th>
+
+        </tr>
         </thead>
         <tbody v-if="loading">
-          <tr>
-            <td colspan="3" class="text-center">加载中...</td>
-          </tr>
+        <tr>
+          <td colspan="3" class="text-center">加载中...</td>
+        </tr>
         </tbody>
         <tbody v-else-if="error">
-          <tr>
-            <td colspan="3" class="text-center">获取数据时出错</td>
-          </tr>
+        <tr>
+          <td colspan="3" class="text-center">获取数据时出错</td>
+        </tr>
         </tbody>
         <tbody v-else>
-          <tr v-for="(spec, index) in productSpecs" :key="index" class="text-center">
-            <td>{{ spec.specId }}</td>
-            <td>{{ spec.color }}</td>
-            <td>{{ spec.stockQuantity }}</td>
+        <tr v-for="(spec, index) in productSpecs" :key="index" class="text-center">
+          <td>{{ spec.specId }}</td>
+          <td>{{ spec.color }}</td>
+          <td>{{ spec.stockQuantity }}</td>
 
-           
-            <td><button @click="deleteProductSpec(spec)" class="btn btn-danger"><i class="fas fa-trash"></i></button>
-            </td>
-            <!-- <td></td> -->
-            <td><button @click="openPhotoModal(spec)" class="btn btn-primary"><i
-                  class="fa-regular fa-image"></i></button></td>
-          
-          </tr>
+
+          <td><button @click="deleteProductSpec(spec)" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+          </td>
+          <!-- <td></td> -->
+          <td><button @click="openPhotoModal(spec)" class="btn btn-primary"><i
+              class="fa-regular fa-image"></i></button></td>
+
+        </tr>
         </tbody>
       </table>
     </div>
@@ -94,7 +94,7 @@
 
               <label for="file" >選擇圖片: </label>
               <input type="file" id="file" ref="file" @change="handleFileChange" required>
-              
+
               <br>
 
               <div class="d-flex justify-content-end">
@@ -142,7 +142,7 @@
               <br />
               <div class="d-flex justify-content-end"> <!-- 新添加的 div -->
                 <button type="button" class="btn btn-secondary" @click="closequantityModal">Close</button>
-                <button type="submit" class="btn btn-primary ml-2" @click="changProductSpecQuantity">Save</button>
+                <button type="button" class="btn btn-primary ml-2" @click="changProductSpecQuantity">Save</button>
               </div>
             </form>
           </div>
@@ -164,12 +164,12 @@
           </div>
           <div class="modal-body">
             <img :src="`http://localhost:8080/mall/productSpec/photo/${this.photo.specId}`" class="card-img-top"
-              alt="Product Image" style="height: 300px; width: 100%; object-fit: contain " />
-          <!-- <div v-if="changePhoto == true " style="border: 2px solid black padding: 10px"> -->
+                 alt="Product Image" style="height: 300px; width: 100%; object-fit: contain " />
+            <!-- <div v-if="changePhoto == true " style="border: 2px solid black padding: 10px"> -->
             <label v-if="changePhoto == true" for="file">選擇圖片:</label>
             <br/>
             <input v-if="changePhoto == true" type="file" id="file" ref="file" @change="handleFileChange" required>
-          <!-- </div> -->
+            <!-- </div> -->
           </div>
           <div class="modal-footer">
 
@@ -186,6 +186,36 @@
 
 
   </main>
+  <!--  modal-->
+  <div class="modal fade" id="saveAccountModal" tabindex="-1" aria-labelledby="saveAccountModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
+          <h5 class="modal-title" id="saveAccountModal">{{ this.modalMessage }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" @click="confirmModal()">確定</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="successAccountModal" tabindex="-1" aria-labelledby="successAccountModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
+          <h5 class="modal-title" id="successAccountModal">{{ this.modalMessage2 }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--  modal-->
 </template>
 
 <script>
@@ -206,14 +236,17 @@ export default {
       loading: false,
       error: false,
       NewProductSpec: {
-        
+
       },
       selectedProductSpec: [],
       newProductId: '',
       specPhoto: [],
       photo: [],
       changePhoto: false,
-
+      myModal:'',
+      modalMessage:'',
+      modalMessage2:'',
+      modalType:''
     };
   },
   created() {
@@ -265,15 +298,15 @@ export default {
       this.z = sessionStorage.getItem("z")
       this.loading = true; // 設置 loading 為 true，顯示“加載中...”的訊息
       axios.get(`${this.API_URL}/products/findProductSpecByProductId?productId=${this.x}`)
-        .then(response => {
-          this.productSpecs = response.data;
-          this.loading = false; // 加載完成後設置 loading 為 false
-        })
-        .catch(error => {
-          console.error('获取产品规格时出错:', error);
-          this.loading = false; // 發生錯誤時設置 loading 為 false
-          this.error = true; // 設置 error 為 true，顯示錯誤訊息
-        });
+          .then(response => {
+            this.productSpecs = response.data;
+            this.loading = false; // 加載完成後設置 loading 為 false
+          })
+          .catch(error => {
+            console.error('获取产品规格时出错:', error);
+            this.loading = false; // 發生錯誤時設置 loading 為 false
+            this.error = true; // 設置 error 為 true，顯示錯誤訊息
+          });
     },
 
     openaddModal() {
@@ -313,75 +346,91 @@ export default {
         stockQuantity: '',
       };
     },
+    confirmModal(){
+      switch(this.modalType) {
+        case 1:
+          axios.post(`${this.API_URL}/products/insertProductSpec`, this.NewProductSpec)
+              .then(response => {
+                console.log(response.data);
+                this.myModal.hide();
+                this.myModal = new bootstrap.Modal(document.getElementById('successAccountModal'));
+                this.modalMessage2 = '新增成功';
+                this.myModal.show();
+                this.uploadPhoto();
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+          break;
+        case 2:
+          console.log(this.selectedProductSpec);
+          axios.put(`${this.API_URL}/products/updateProductSpec?specId=${this.selectedProductSpec.specId}&stockQuantity=${this.selectedProductSpec.stockQuantity}`)
+              .then(response => {
+                console.log(response.data);
+                this.myModal.hide();
+                this.closequantityModal();
+                this.fetchData();
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+          break;
+        case 3:
+          axios.delete(`${this.API_URL}/products/deleteProductSpec?specId=${this.specId}`)
+              .then(response => {
+                console.log(response.data);
+                this.myModal.hide();
+                this.myModal = new bootstrap.Modal(document.getElementById('successAccountModal'));
+                this.modalMessage2 = '刪除成功';
+                this.myModal.show();
+                this.fetchData();
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                this.myModal.hide();
+                this.myModal = new bootstrap.Modal(document.getElementById('successAccountModal'));
+                this.modalMessage2 = '刪除失敗';
+                this.myModal.show();
+              });
+          break;
+        case 4:
+          let formData = new FormData();
+          formData.append('specId', this.photo.specId);
+          formData.append('file', this.file);
+          axios.put(`${this.API_URL}/products/changeSpecPhoto`, formData).then(response => {
+            console.log(response.data);
+            this.closePhotoModal();
+            this.fetchData();
+
+          })
+      }
+    },
     saveProductSpec() {
       this.NewProductSpec.deleted=false;
       console.log(this.NewProductSpec);
-   
 
-      if (confirm('確定要新增嗎?')) {
-        axios.post(`${this.API_URL}/products/insertProductSpec`, this.NewProductSpec)
-          .then(response => {
-            console.log("123");
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要新增嗎？'
+      this.modalType=1;
+      this.myModal.show();
 
-            console.log(response.data);
-            // this.uploadPhoto();
-            alert("新增成功");
-
-            // this.closeaddModal();
-            this.uploadPhoto();
-
-            // this.fetchData();
-
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-      } else {
-
-        // 如果用户取消保存操作，则不执行保存逻辑
-        console.log('取消保存');
-      }
     },
     refreshWindow() {
       window.location.reload();
     },
     changProductSpecQuantity() {
       console.log(this.selectedProductSpec);
-      if (confirm('確定要修改嗎?')) {
-
-        axios.put(`${this.API_URL}/products/updateProductSpec?specId=${this.selectedProductSpec.specId}&stockQuantity=${this.selectedProductSpec.stockQuantity}`)
-          .then(response => {
-            console.log(response.data);
-
-            this.closequantityModal();
-
-            this.fetchData();
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          })
-      } else {
-        this.closequantityModal();
-        console.log('取消修改');
-      }
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要修改嗎？'
+      this.modalType=2;
+      this.myModal.show();
     },
     deleteProductSpec(spec) {
-      if (confirm('確定要刪除嗎?')) {
-        axios.delete(`${this.API_URL}/products/deleteProductSpec?specId=${spec.specId}`)
-          .then(response => {
-            console.log(response.data);
-            this.$router.go();
-            alert('刪除成功');
-            this.fetchData();
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alert('刪除失敗');
-          });
-      } else {
-        console.log('取消刪除');
-        alert('已取消刪除');
-      }
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要刪除嗎？'
+      this.modalType=3;
+      this.specId=spec.specId;
+      this.myModal.show();
     },
     handleFileChange(event) {
       this.file = event.target.files[0];
@@ -392,27 +441,27 @@ export default {
       formData.append('file', this.file);
 
       axios.post(`${this.API_URL}/products/insertProductPhoto`, formData)
-        .then(response => {
-          console.log(response.data); // Success message from server
-          // Show success message
-          this.showSuccessMessage = true;
-          // Hide success message after 3 seconds
-          this.closeaddModal();
-          this.fetchData();
+          .then(response => {
+            console.log(response.data); // Success message from server
+            // Show success message
+            this.showSuccessMessage = true;
+            // Hide success message after 3 seconds
+            this.closeaddModal();
+            this.fetchData();
 
-          setTimeout(() => {
-            this.showSuccessMessage = false;
-          }, 1000);
-        })
-        .catch(error => {
-          console.error('There was a problem with the axios operation:', error);
-          // Show error message
-          this.showErrorMessage = true;
-          // Hide error message after 3 seconds
-          setTimeout(() => {
-            this.showErrorMessage = false;
-          }, 3000);
-        });
+            setTimeout(() => {
+              this.showSuccessMessage = false;
+            }, 1000);
+          })
+          .catch(error => {
+            console.error('There was a problem with the axios operation:', error);
+            // Show error message
+            this.showErrorMessage = true;
+            // Hide error message after 3 seconds
+            setTimeout(() => {
+              this.showErrorMessage = false;
+            }, 3000);
+          });
     },
     showLoadingAnimation() {
       // 創建一個新的<div>元素來顯示等待動畫
@@ -467,17 +516,10 @@ export default {
       console.log(this.changePhoto);
     },
     updatePhoto() {
-      let formData = new FormData();
-            formData.append('specId', this.photo.specId);
-            formData.append('file', this.file);
-      if (confirm('確定要修改嗎?')) {
-        axios.put(`${this.API_URL}/products/changeSpecPhoto`, formData).then(response => {
-          console.log(response.data);
-          this.closePhotoModal();
-          this.fetchData();
-        
-        })
-      }
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要修改嗎？'
+      this.modalType=4;
+      this.myModal.show();
     }
 
 
