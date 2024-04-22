@@ -116,7 +116,7 @@
             </div>
             <div class="d-flex justify-content-end"> <!-- 新添加的 div -->
               <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
-              <button type="submit" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
+              <button type="button" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
             </div>
           </form>
         </div>
@@ -164,7 +164,7 @@
             </div>
             <div class="d-flex justify-content-end">
               <button type="button" class="btn btn-secondary" @click="closeChangeModal">Close</button>
-              <button type="submit" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
+              <button type="button" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
             </div>
           </form>
         </div>
@@ -174,7 +174,36 @@
     </div>
   </div>
 
+  <!--  modal-->
+  <div class="modal fade" id="saveAccountModal" tabindex="-1" aria-labelledby="saveAccountModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
+          <h5 class="modal-title" id="saveAccountModal">{{ this.modalMessage }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" @click="confirmModal()">確定</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="modal fade" id="successAccountModal" tabindex="-1" aria-labelledby="successAccountModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
+          <h5 class="modal-title" id="successAccountModal">{{ this.modalMessage2 }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--  modal-->
 
 
 
@@ -208,9 +237,14 @@ export default {
       },
       searchTerm: '',
       filteredProducts: [],
-
-
+      myModal:'',
+      modalMessage:'',
+      modalMessage2:'',
+      modalType:'',
+      product:'',
+      productId:'',
     };
+
   },
   watch: {
     searchTerm(newValue) {
@@ -219,20 +253,56 @@ export default {
     },
   },
   methods: {
-    deletedProduct(product) {
-      console.log();
-      if (confirm("您確定要刪除這筆產品嗎？")) {
-        axios.delete(`${this.API_URL}/products/deleteProduct?productId=${product.productId}`)
-          .then(() => {
-            this.products = this.products.filter(p => p !== product);
-            console.log('刪除成功');
-            this.$router.go();
-          })
-          .catch(error => {
-            console.error('Error deleting product:', error);
-          });
+    confirmModal(){
+      switch(this.modalType) {
+        case 1:
+          axios.delete(`${this.API_URL}/products/deleteProduct?productId=${this.product.productId}`)
+              .then(() => {
+                this.products = this.products.filter(p => p !== this.product);
+                console.log('刪除成功');
+                this.$router.go();
+              })
+              .catch(error => {
+                console.error('Error deleting product:', error);
+              });
+          break;
+        case 2:
+          console.log('New Product:', this.NewProduct);
 
+          axios.post(`${this.API_URL}/products/insertPhone`, this.NewProduct)
+              .then(response => {
+                this.resetFormData(); // 清空表单数据
+                console.log(response.data);
+                this.closeModal();
+                this.$router.go();
+
+
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+          break;
+        case 3:
+          axios.put(`${this.API_URL}/products/productSalesStatus?productId=${this.productId}`)
+              .then(response => {
+                console.log(response.data);
+                // 成功上下架後重新載入資料，更新產品列表
+                // this.fetchData();
+                this.$router.go();
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
       }
+    },
+    deletedProduct(product) {
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要刪除嗎？'
+      this.modalType=1;
+      this.product=product;
+      this.myModal.show();
+
+
     },
 
     redirectToSpec(product) {
@@ -275,30 +345,11 @@ export default {
     },
 
     saveProduct() {
-      // 保存产品前先显示二次确认提示
-      if (confirm("您確定要新增這筆產品嗎？")) {
-        console.log('New Product:', this.NewProduct);
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='確定要新增嗎？'
+      this.modalType=2;
+      this.myModal.show();
 
-        axios.post(`${this.API_URL}/products/insertPhone`, this.NewProduct)
-          .then(response => {
-            this.resetFormData(); // 清空表单数据
-            console.log(response.data);
-            this.showLoadingAnimation
-
-            setTimeout(() => {
-              this.hideLoadingAnimation();
-              this.closeModal();
-              this.fetchData();
-            }, 1000);
-
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-      } else {
-        // 如果用户取消保存操作，则不执行保存逻辑
-        console.log('取消保存');
-      }
     },
     saveChangeProduct() {
       // 保存产品前先显示二次确认提示
@@ -321,17 +372,12 @@ export default {
       }
     },
     changeSalesStatus(productId) {
-      if (confirm("您確定要更改這筆產品販售狀態嗎？")) { }
-      axios.put(`${this.API_URL}/products/productSalesStatus?productId=${productId}`)
-        .then(response => {
-          console.log(response.data);
-          // 成功上下架後重新載入資料，更新產品列表
-          // this.fetchData();
-          this.$router.go();
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
+
+      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
+      this.modalMessage='您確定要更改這筆產品販售狀態嗎？'
+      this.modalType=3;
+      this.productId=productId;
+      this.myModal.show();
     },
     resetFormData() {
       this.NewProduct = {
@@ -419,7 +465,7 @@ export default {
   created() {
     const loggedInMember = sessionStorage.getItem('loggedInMember');
     const loggedInMemberObject = JSON.parse(loggedInMember);
-    console.log(loggedInMemberObject);
+    console.log(sessionStorage.getItem('loggedInMember'));
     if (loggedInMemberObject === null) {
       alert('請先登入');
       this.$router.push('/login');

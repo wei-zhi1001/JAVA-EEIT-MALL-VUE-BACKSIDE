@@ -402,7 +402,8 @@ export default {
             this.closePhotoModal();
             this.fetchData();
 
-          })
+          });
+          break;
       }
     },
     saveProductSpec() {

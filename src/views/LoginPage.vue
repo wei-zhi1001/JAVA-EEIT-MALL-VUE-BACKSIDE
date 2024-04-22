@@ -79,12 +79,15 @@ export default {
       axios
         .post(`${this.API_URL}/user/login`, fd)
         .then((rs) => {
-          const userStore = useUserStore();
-          userStore.loginSuccess(rs.data);
-          sessionStorage.setItem("loggedInMember", JSON.stringify(rs.data));
-          this.$router.push("/");
+
           if (rs.data.authentication == "1"|| rs.data.authentication == "0") {
             alert("您現在使用的是後臺系統，歡迎回來!");
+            const userStore = useUserStore();
+            userStore.loginSuccess(rs.data);
+            sessionStorage.setItem("loggedInMember", JSON.stringify(rs.data));
+            this.$router.push("/");
+          }else{
+            alert("非管理者帳號");
           }
 
 
