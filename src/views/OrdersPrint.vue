@@ -12,7 +12,7 @@
       PDF
     </button>
 
-    <table class="table1" ref="ordersTable">
+    <table class="table1" ref="ordersTable1">
       <thead>
       <tr>
         <th>出貨單</th>
@@ -45,7 +45,7 @@
 
     <br/>
 
-    <table class="table2">
+    <table class="table2" ref="ordersTable2">
       <thead>
       <tr class="text-center">
         <th scope="col">品名</th>
@@ -125,14 +125,25 @@ export default {
       // 添加字體
       doc.addFont(ArialUnicodeMS, "ArialUnicodeMS"); // 為字體指定一個名稱
 
-      // 將表格轉換成可匯出的格式
-      const table = this.$refs.ordersTable;
+      // 取得 table1 和 table2 的 HTML 元素
+      const table1 = this.$refs.ordersTable1;
+      const table2 = this.$refs.ordersTable2;
 
       // 將表格內容加入 PDF 中
       doc.setFont("ArialUnicodeMS"); // 設置字體
-      doc.text("訂單列表", 10, 10); // 添加繁體中文文本
+      doc.text("OrderDetails", 10, 10); // 添加繁體中文文本
       doc.autoTable({
-        html: table,
+        html: table1,
+        startY: 20, // 設置 table1 的起始位置
+        styles: {
+          font: "ArialUnicodeMS",
+          //這裏設置字體樣式
+          fontStyle: "normal",
+        },
+      });
+      doc.autoTable({
+        html: table2,
+        startY: doc.lastAutoTable.finalY + 10, // 設置 table2 的起始位置在前一個表格的底部
         styles: {
           font: "ArialUnicodeMS",
           //這裏設置字體樣式
@@ -241,38 +252,23 @@ export default {
 
 .custom-link {
   background-color: transparent;
-  /* 背景透明 */
   color: black;
-  /* 文字颜色 */
-  /* padding: 7px; */
-  /* 设置内边距 */
   display: inline-block;
-  /* 让链接变成行内块元素，以便控制宽度和高度 */
   position: relative;
-  /* 使得子元素的绝对定位相对于父元素 */
   text-decoration: none;
-  /* 移除下划线 */
   transition: color 0.3s;
-  /* 添加文字颜色的过渡效果 */
-  /* top: 10px; */
 }
 
 .custom-link:hover {
   color: gray;
-  /* 鼠标移上去时文字颜色变为灰色 */
 }
 
 .custom-link b-icon {
   display: block;
-  /* 将图标变为块级元素 */
   position: absolute;
-  /* 绝对定位，以便于控制位置 */
   top: -10px;
-  /* 将图标上移 */
   left: 50%;
-  /* 水平居中 */
   transform: translateX(-50%);
-  /* 水平居中 */
 }
 
 .btn-outline-dark {
@@ -280,21 +276,16 @@ export default {
   top: 160px;
   right: 105px;
   margin: 10px;
-  /* 调整按钮与表格的间距 */
 }
 
 .modal-header {
   position: relative;
-  /* 使得 .modal-header 成为定位上下文 */
 }
 
 .close {
   position: absolute;
-  /* 相对于 .modal-header 定位 */
   top: 10px;
-  /* 调整关闭按钮与顶部的距离 */
   right: 10px;
-  /* 调整关闭按钮与右侧的距离 */
 }
 
 .table2 {
@@ -314,12 +305,10 @@ export default {
   white-space: nowrap;
 }
 
-/* 定義主顏色 */
 :root {
   --primary-color: #007bff;
 }
 
-/* 定義按鈕樣式 */
 .table button {
   border: 1px solid var(--primary-color);
   border-radius: 20px;
@@ -332,7 +321,6 @@ export default {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* 按鈕懸停時變化 */
 .table button:hover {
   background-color: var(--primary-color);
   color: #fff;
@@ -340,15 +328,6 @@ export default {
 
 .table button {
   margin-right: 0px;
-  /* 設定按鈕的右邊距 */
 }
 
-/*
-.table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2; 確保標題行在上方
-  background-color: #fff; 可以選擇性地設置背景色
-}
-*/
 </style>

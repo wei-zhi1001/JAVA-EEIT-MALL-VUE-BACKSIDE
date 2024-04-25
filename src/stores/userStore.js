@@ -25,7 +25,6 @@ export const useUserStore = defineStore("userStore", {
       this.userEmail = "";
       this.userAuthentication = "";
       this.isLoggedIn = false;
-      sessionStorage.clear();
     },
   },
   getters: {},

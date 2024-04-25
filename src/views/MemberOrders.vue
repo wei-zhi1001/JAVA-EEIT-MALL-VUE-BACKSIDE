@@ -421,7 +421,7 @@ export default {
       doc.autoTable({
         html: table,
         startY: 20, // 表格的起始Y座標
-        margin: { top: 20 }, // 表格的邊距
+        margin: {top: 20}, // 表格的邊距
         styles: {
           font: "ArialUnicodeMS",
           //這裏設置字體樣式
@@ -494,7 +494,6 @@ export default {
       return dateTime.toLocaleString("zh-TW", options);
     },
 
-
     search() {
       // 根據搜索條件過濾訂單列表
       if (this.searchTerm.trim() === "") {
@@ -526,62 +525,51 @@ export default {
     },
 
     demoInsertModal() {
-      this.NewOrder.userId = "27";
-      this.NewOrder.orderDate = "2024-04-16";
+      this.NewOrder.userId = "2";
+      this.NewOrder.orderDate = "2024-04-26";
       this.NewOrder.paymentMethod = "Paypal";
       this.NewOrder.orderStatus = "處理中";
-      this.NewOrder.deliverDate = "2024-04-16";
-      this.NewOrder.pickupDate = "2024-04-16";
-      this.NewOrder.deliverAddress = "台南市東區北門路一段60號";
-      this.NewOrder.recipientName = "陳怡君";
-      this.NewOrder.recipientPhone = "0989012345";
-      this.NewOrder.paymentTime = "2024-04-16";
+      this.NewOrder.deliverDate = "2024-04-26";
+      this.NewOrder.pickupDate = "2024-04-26";
+      this.NewOrder.deliverAddress = "台北市信義區公園南路123號";
+      this.NewOrder.recipientName = "王小明";
+      this.NewOrder.recipientPhone = "0911222333";
+      this.NewOrder.paymentTime = "2024-04-26";
     },
 
     saveOrder() {
-      if (confirm("您確定要儲存這項資料嗎？")) {
-        console.log("New Order:", this.NewOrder);
-
-        axios
-            .post(`${this.API_URL}/orders/insertOrders`, this.NewOrder)
-            .then((response) => {
-              this.resetFormData(); //清空表單數據
-              console.log(response.data);
-              // this.fetchData();
-              this.closeInsertModal();
-              this.$router.go();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-      } else {
-        // 如果用戶取消保存操作，則不執行保存邏輯
-        console.log("取消保存");
-      }
+      console.log("New Order:", this.NewOrder);
+      axios
+          .post(`${this.API_URL}/orders/insertOrders`, this.NewOrder)
+          .then((response) => {
+            this.resetFormData(); //清空表單數據
+            console.log(response.data);
+            // this.fetchData();
+            this.closeInsertModal();
+            this.$router.go();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     },
 
     saveEditedOrder() {
-      if (confirm("您確定要儲存這次的編輯嗎？")) {
-        console.log("New Order:", this.NewOrder);
-        axios
-            .put(
-                `${this.API_URL}/orders/updateOrder/${this.NewOrder.orderId}`,
-                this.NewOrder
-            )
-            .then((response) => {
-              this.resetFormData(); //清空表單數據
-              console.log(response.data);
-              // this.fetchData();
-              this.closeEditModal();
-              this.$router.go();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-      } else {
-        // 如果用戶取消保存操作，則不執行保存邏輯
-        console.log("取消保存");
-      }
+      console.log("New Order:", this.NewOrder);
+      axios
+          .put(
+              `${this.API_URL}/orders/updateOrder/${this.NewOrder.orderId}`,
+              this.NewOrder
+          )
+          .then((response) => {
+            this.resetFormData(); //清空表單數據
+            console.log(response.data);
+            // this.fetchData();
+            this.closeEditModal();
+            this.$router.go();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     },
 
     // updateOrderStatus(specifiedOrderId, newStatus) {
@@ -688,11 +676,6 @@ export default {
 </script>
 
 <style scoped>
-/* .container {
-  max-width: 95%;
-  overflow-x: auto;  啟用水平捲動
-} */
-
 .custom-link {
   background-color: transparent;
   /* 背景透明 */
@@ -735,11 +718,6 @@ export default {
   margin-bottom: 5px;
 }
 
-.modal-header {
-  position: relative;
-  /* 使得 .modal-header 成为定位上下文 */
-}
-
 .close {
   position: absolute;
   /* 相对于 .modal-header 定位 */
@@ -760,7 +738,6 @@ export default {
   position: sticky;
   top: 0;
   z-index: 2; /* 確保標題行在上方 */
-  //background-color: #F0F0F0; /* 可以選擇性地設置背景色 */
 }
 
 .table tbody td {
@@ -782,8 +759,9 @@ export default {
   color: #5B5B5B;
   font-size: 14px;
   font-weight: bold;
-  //cursor: pointer;
+  cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
+  margin-right: 0px; /* 設定按鈕的右邊距 */
 }
 
 /* 按鈕懸停時變化 */
@@ -792,10 +770,49 @@ export default {
   color: #E0E0E0;
 }
 
-.table button {
-  margin-right: 0px;
-  /* 設定按鈕的右邊距 */
+.modal {
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  backdrop-filter: blur(0.2px); /* 背景模糊效果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
 }
 
+.modal-header {
+  background-color: #E0E0E0; /* 淺灰色背景 */
+  position: relative; /* 使得 .modal-header 成为定位上下文 */
+}
+
+.modal-title {
+  font-weight: bold; /* 將 modal 內容文字設置為粗體 */
+}
+
+.modal-body {
+  font-weight: bold; /* 將 modal 內容文字設置為粗體 */
+}
+
+.modal-footer {
+  background-color: #E0E0E0; /* 淺灰色背景 */
+}
+
+.modal button {
+  background-color: #FFFFFF; /* 使用主顏色 */
+  color: #000000; /* 文字顏色 */
+  border: 1.5px solid #000000; /* 邊框 */
+  border-radius: 5px; /* 圓角 */
+  padding: 6px 10px; /* 調整內邊距 */
+  cursor: pointer; /* 滑鼠指標 */
+  transition: background-color 0.3s, color 0.3s; /* 添加過渡效果 */
+  margin-left: 5px; /* 調整按鈕間距 */
+}
+
+.modal button:hover {
+  background-color: #000000; /* 按鈕懸停時的背景顏色 */
+  color: #FFFFFF;
+}
+
+.form-control {
+  border-width: 1.5px; /* 設置邊框寬度為 2px */
+  border-style: solid; /* 使用實線邊框 */
+  border-color: #ADADAD; /* 設置邊框顏色 */
+}
 
 </style>

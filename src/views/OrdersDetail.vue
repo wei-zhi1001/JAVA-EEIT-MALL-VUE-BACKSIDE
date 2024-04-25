@@ -3,67 +3,82 @@
     <h2>訂單明細</h2>
     <br/>
 
-    <h7 class="subtitle">
+    <h6 class="subtitle">
       訂單編號：{{ x }}<br/>
       訂購日期：{{ formatDate(y) }}<br/>
-    </h7>
+    </h6>
     <br/>
 
-    <!-- 移到表格外部 -->
-    <button type="button" class="btn btn-primary btn-add" @click="openInsertModal">
-      新增
+    <!--     移到表格外部-->
+    <!--    <button-->
+    <!--        type="button"-->
+    <!--        class="btn btn-outline-dark"-->
+    <!--        @click="redirectToOrdersPrint(x)"-->
+    <!--    >-->
+    <!--      列印-->
+    <!--    </button>-->
+    <button
+        type="button"
+        class="btn btn-outline-dark"
+        @click="exportToExcel"
+    >
+      Excel
     </button>
 
     <button
         type="button"
         class="btn btn-outline-dark"
-        @click="redirectToOrdersPrint(x)"
+        @click="exportToPDF"
     >
-      列印
+      PDF
     </button>
 
-    <table class="table table-striped table-hover">
-      <thead>
-      <tr class="text-center">
-        <th scope="col">訂單編號</th>
-        <th scope="col">產品名稱</th>
-        <th scope="col">顏色</th>
-        <th scope="col">訂購數量</th>
-        <th scope="col">價格</th>
-        <th scope="col">修改</th>
-        <th scope="col">刪除</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr
-          v-for="odDTO in filteredOrdersDetailDTOs"
-          :key="odDTO.ordersDetailId"
-          class="text-center"
-      >
-        <td>{{ odDTO.orderId }}</td>
-        <td>{{ odDTO.productName }}</td>
-        <td>{{ odDTO.color }}</td>
-        <td>{{ odDTO.quantity }}</td>
-        <td>{{ odDTO.price }}</td>
-        <td>
-          <button @click="openEditModal(odDTO)">
-            <i class="fas fa-pen"></i>
-          </button>
-        </td>
-        <td>
-          <button @click="deleteOrdersDetail(odDTO)">
-            <i class="fas fa-trash"></i>
-          </button>
-          <!-- <button v-else @click="changeSalesStatus(product.productId)">
-            <i class="fas fa-xmark"></i>
-          </button> -->
-        </td>
-      </tr>
-      </tbody>
-    </table>
+    <button type="button" class="btn btn-outline-dark" @click="openInsertModal">
+      新增
+    </button>
+    <br/><br/>
+
+    <div class="table-frame">
+      <table class="table table-hover" ref="ordersDetailTable">
+        <thead>
+        <tr class="text-center">
+          <th scope="col">訂單編號</th>
+          <th scope="col">產品名稱</th>
+          <th scope="col">顏色</th>
+          <th scope="col">訂購數量</th>
+          <th scope="col">價格</th>
+          <th scope="col">修改</th>
+          <th scope="col">刪除</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+            v-for="odDTO in filteredOrdersDetailDTOs"
+            :key="odDTO.ordersDetailId"
+            class="text-center"
+        >
+          <td>{{ odDTO.orderId }}</td>
+          <td>{{ odDTO.productName }}</td>
+          <td>{{ odDTO.color }}</td>
+          <td>{{ odDTO.quantity }}</td>
+          <td>{{ odDTO.price }}</td>
+          <td>
+            <button @click="openEditModal(odDTO)">
+              <i class="fas fa-pen"></i>
+            </button>
+          </td>
+          <td>
+            <button @click="openDeleteModal(odDTO)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
-  <!-- 新增訂單明細Modal -->
+  <!-- 新增訂單明細的Modal -->
   <div class="modal" tabindex="-1" role="dialog" ref="insertModal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -141,7 +156,7 @@
     </div>
   </div>
 
-  <!-- 修改訂單明細Modal -->
+  <!-- 修改訂單明細的Modal -->
   <div class="modal" tabindex="-1" role="dialog" ref="editModal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -212,10 +227,57 @@
     </div>
   </div>
 
+  <!-- 刪除訂單明細的Modal -->
+  <div class="modal" tabindex="-1" role="dialog" ref="deleteModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button
+              type="button"
+              class="close"
+              aria-label="Close"
+              @click="closeDeleteModal"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h5 class="modal-title">刪除訂單明細</h5>
+        </div>
+
+        <div class="modal-body">
+
+
+          <form>
+            <div class="form-group">
+              <h6>您確定要刪除這筆明細嗎？</h6>
+            </div>
+
+            <br/>
+            <div class="d-flex justify-content-end">
+              <!-- 新添加的 div -->
+              <button
+                  type="button"
+                  class="btn btn-primary ml-2"
+                  @click="deleteOrdersDetail()"
+              >
+                確定
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer"></div>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
 <script>
 import axios from "axios";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import ArialUnicodeMS from "../assets/fonts/ArialUnicodeMS.ttf";
+import * as XLSX from "xlsx"; // 使用具名導入方式
 
 export default {
   data() {
@@ -230,20 +292,108 @@ export default {
         quantity: '',
         price: '',
       },
+      deletedOrdersDetailDTO: {
+        orderId: '',
+        userName: '',
+        ordersDetailI: '',
+        productNam: '',
+        specId: '',
+        color: '',
+        quantity: '',
+        price: '',
+        orderDate: '',
+        orderStatus: '',
+        deliverAddress: '',
+        recipientPhone: '',
+      },
     };
   },
 
   methods: {
-    redirectToOrdersPrint(x) {
-      sessionStorage.setItem('x', x);
-      console.log(x)
-      this.$router.push({
-        path: "/orders/print",
-        query: {
-          xOrderId: x,
+
+    exportToPDF() {
+      const doc = new jsPDF();
+
+      // 添加字體
+      doc.addFont(ArialUnicodeMS, "ArialUnicodeMS"); // 為字體指定一個名稱
+
+      // 將表格轉換成可匯出的格式
+      const table = this.$refs.ordersDetailTable;
+
+      // 將表格內容加入 PDF 中
+      doc.setFont("ArialUnicodeMS"); // 設置字體
+      doc.text("OrdersDetail", 10, 10); // 添加繁體中文文本
+      doc.autoTable({
+        html: table,
+        startY: 20, // 表格的起始Y座標
+        margin: {top: 20}, // 表格的邊距
+        styles: {
+          font: "ArialUnicodeMS",
+          //這裏設置字體樣式
+          fontStyle: "normal",
+          overflow: 'linebreak', // 設置表格內容溢出時的處理方式
         },
       });
+
+      // 下載 PDF
+      doc.save("訂單明細.pdf");
     },
+
+    exportToExcel() {
+      // 設定要匯出的資料
+      const data = this.filteredOrdersDetailDTOs.map((odDTO) => ({
+        訂單編號: odDTO.orderId,
+        產品名稱: odDTO.productName,
+        顏色: odDTO.color,
+        訂購數量: odDTO.quantity,
+        價格: odDTO.price,
+      }));
+
+      // 創建新的Workbook
+      const wb = XLSX.utils.book_new();
+      // 將資料轉換為Worksheet
+      const ws = XLSX.utils.json_to_sheet(data);
+      // 將Worksheet添加到Workbook中
+      XLSX.utils.book_append_sheet(wb, ws, "訂單明細");
+
+      // 將Workbook轉換為二進制數據
+      const wbBinary = XLSX.write(wb, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      // 創建Blob對象
+      const blob = new Blob([wbBinary], {type: "application/octet-stream"});
+
+      // 下載Excel檔
+      const fileName = "訂單明細.xlsx";
+      if (navigator.msSaveBlob) {
+        // For IE
+        navigator.msSaveBlob(blob, fileName);
+        console.log(blob);
+      } else {
+        // For other browsers
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        console.log(blob);
+        console.log(link);
+      }
+    },
+
+    // redirectToOrdersPrint(x) {
+    //   sessionStorage.setItem('x', x);
+    //   console.log(x)
+    //   this.$router.push({
+    //     path: "/orders/print",
+    //     query: {
+    //       xOrderId: x,
+    //     },
+    //   });
+    // },
 
     formatDate(dateTimeString) {
       const options = {
@@ -264,60 +414,50 @@ export default {
     },
 
     saveOrdersDetail() {
-      if (confirm("您確定要儲存這項資料嗎？")) {
-        this.NewOrdersDetail.orderId = this.x
-        console.log('New OrdersDetail:', this.NewOrdersDetail);
-        axios.post(`${this.API_URL}/orders/insertOrdersDetail`, this.NewOrdersDetail)
-            .then(response => {
-              this.resetFormData(); //清空表單數據
-              console.log(response.data);
-              // this.fetchData(); //→這句的目的是什麼？
-              this.closeInsertModal();
-              this.$router.go();
-            })
-            .catch(error => {
-              console.error('Error:', error);
-            });
-      } else {
-        // 如果用戶取消保存操作，則不執行保存邏輯
-        console.log('取消保存');
-      }
+      this.NewOrdersDetail.orderId = this.x
+      console.log('New OrdersDetail:', this.NewOrdersDetail);
+      axios.post(`${this.API_URL}/orders/insertOrdersDetail`, this.NewOrdersDetail)
+          .then(response => {
+            this.resetFormData(); //清空表單數據
+            console.log(response.data);
+            // this.fetchData(); //→這句的目的是什麼？
+            this.closeInsertModal();
+            this.$router.go();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
     },
 
     saveEditedOrdersDetail() {
-      if (confirm("您確定要儲存這次的編輯嗎？")) {
-        this.NewOrdersDetail.orderId = this.x
-        console.log('New OrdersDetail:', this.NewOrdersDetail);
-        axios
-            .put(`${this.API_URL}/orders/updateOrdersDetail/${this.NewOrdersDetail.ordersDetailId}`, this.NewOrdersDetail)
-            .then((response) => {
-              this.resetFormData(); //清空表單數據
-              console.log(response.data);
-              // this.fetchData();
-              this.closeEditModal();
-              this.$router.go();
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-      } else {
-        // 如果用戶取消保存操作，則不執行保存邏輯
-        console.log("取消保存");
-      }
+      this.NewOrdersDetail.orderId = this.x
+      console.log('New OrdersDetail:', this.NewOrdersDetail);
+      axios
+          .put(`${this.API_URL}/orders/updateOrdersDetail/${this.NewOrdersDetail.ordersDetailId}`, this.NewOrdersDetail)
+          .then((response) => {
+            this.resetFormData(); //清空表單數據
+            console.log(response.data);
+            // this.fetchData();
+            this.closeEditModal();
+            this.$router.go();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     },
 
-    deleteOrdersDetail(odDTO) {
-      if (confirm("您確定要刪除這筆明細嗎？")) {
-        axios.delete(`${this.API_URL}/orders/deleteOrdersDetail/${odDTO.ordersDetailId}`)
-            .then(response => {
-              this.ordersDetailDTOs = this.ordersDetailDTOs.filter(ordersDetail => ordersDetail !== odDTO);
-              console.log('刪除成功');
-              this.$router.go();
-            })
-            .catch(error => {
-              console.error('Error deleting product:', error);
-            });
-      }
+    deleteOrdersDetail() {
+      // console.log('before 刪除');
+      axios.delete(`${this.API_URL}/orders/deleteOrdersDetail/${this.deletedOrdersDetailDTO.ordersDetailId}`)
+          .then(() => {
+            this.ordersDetailDTOs = this.ordersDetailDTOs.filter(ordersDetail => ordersDetail !== this.deletedOrdersDetailDTO);
+            console.log('刪除成功');
+            this.closeDeleteModal();
+            // this.$router.go();
+          })
+          .catch(error => {
+            console.error('Error deleting ordersDetail:', error);
+          });
     },
 
     resetFormData() {
@@ -359,6 +499,20 @@ export default {
       document.body.classList.remove("modal-open");
       this.resetFormData();
     },
+
+    openDeleteModal(odDTO) {
+      this.$refs.deleteModal.classList.add("show");
+      this.$refs.deleteModal.style.display = "block";
+      document.body.classList.add("modal-open");
+      this.deletedOrdersDetailDTO = odDTO;
+    },
+
+    closeDeleteModal() {
+      this.$refs.deleteModal.classList.remove("show");
+      this.$refs.deleteModal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    },
+
   },
 
   mounted() {
@@ -403,10 +557,6 @@ export default {
 </script>
 
 <style scoped>
-/* .container {
-  max-width: 95%;
-  overflow-x: auto;  啟用水平捲動
-} */
 
 .subtitle {
   color: grey;
@@ -448,34 +598,34 @@ export default {
   /* 水平居中 */
 }
 
-.btn-add {
-  position: absolute;
-  top: 160px;
-  right: 105px;
-  margin: 10px;
-  /* 调整按钮与表格的间距 */
-}
-
-.modal-header {
-  position: relative;
-  /* 使得 .modal-header 成为定位上下文 */
+.btn-outline-dark {
+  float: right; /* 讓按鈕靠右浮動 */
+  margin-left: 10px; /* 調整按鈕間距 */
+  margin-bottom: 10px;
 }
 
 .close {
-  position: absolute;
-  /* 相对于 .modal-header 定位 */
-  top: 10px;
-  /* 调整关闭按钮与顶部的距离 */
-  right: 10px;
-  /* 调整关闭按钮与右侧的距离 */
+  position: absolute; /* 相对于 .modal-header 定位 */
+  top: 10px; /* 调整关闭按钮与顶部的距离 */
+  right: 10px; /* 调整关闭按钮与右侧的距离 */
+}
+
+.table-frame {
+  border: 3px solid #ADADAD;
+  border-radius: 10px;
+  padding: 10px 30px;
 }
 
 .table thead th {
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2; /* 確保標題行在上方 */
 }
 
-.table tbody th {
+.table tbody td {
   white-space: nowrap;
+  vertical-align: bottom;
 }
 
 /* 定義主顏色 */
@@ -485,32 +635,67 @@ export default {
 
 /* 定義按鈕樣式 */
 .table button {
-  border: 1px solid var(--primary-color);
+  border: 1px solid #5B5B5B;
   border-radius: 20px;
   padding: 6px 12px;
   background-color: transparent;
-  color: var(--primary-color);
+  color: #5B5B5B;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
+  margin-right: 0px; /* 設定按鈕的右邊距 */
 }
 
 /* 按鈕懸停時變化 */
 .table button:hover {
-  background-color: var(--primary-color);
-  color: #fff;
+  background-color: #5B5B5B;
+  color: #E0E0E0;
 }
 
-.table button {
-  margin-right: 0px;
-  /* 設定按鈕的右邊距 */
+.modal {
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  backdrop-filter: blur(0.2px); /* 背景模糊效果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加陰影效果 */
 }
 
-.table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2; /* 確保標題行在上方 */
-  background-color: #fff; /* 可以選擇性地設置背景色 */
+.modal-header {
+  background-color: #E0E0E0; /* 淺灰色背景 */
+  position: relative; /* 使得 .modal-header 成为定位上下文 */
 }
+
+.modal-title {
+  font-weight: bold; /* 將 modal 內容文字設置為粗體 */
+}
+
+.modal-body {
+  font-weight: bold; /* 將 modal 內容文字設置為粗體 */
+}
+
+.modal-footer {
+  background-color: #E0E0E0; /* 淺灰色背景 */
+}
+
+.modal button {
+  background-color: #FFFFFF; /* 使用主顏色 */
+  color: #000000; /* 文字顏色 */
+  border: 1.5px solid #000000; /* 邊框 */
+  border-radius: 5px; /* 圓角 */
+  padding: 6px 10px; /* 調整內邊距 */
+  cursor: pointer; /* 滑鼠指標 */
+  transition: background-color 0.3s, color 0.3s; /* 添加過渡效果 */
+  margin-left: 5px; /* 調整按鈕間距 */
+}
+
+.modal button:hover {
+  background-color: #000000; /* 按鈕懸停時的背景顏色 */
+  color: #FFFFFF;
+}
+
+.form-control {
+  border-width: 1.5px; /* 設置邊框寬度為 2px */
+  border-style: solid; /* 使用實線邊框 */
+  border-color: #ADADAD; /* 設置邊框顏色 */
+}
+
 </style>

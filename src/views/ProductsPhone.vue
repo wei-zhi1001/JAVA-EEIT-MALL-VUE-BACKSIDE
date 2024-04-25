@@ -46,9 +46,7 @@
               <button @click="openChangeModal(product)" class="actionButton">
                 <i class="fas fa-pen"></i>
               </button>
-
             </td>
-
             <td>
               <button v-if="product.salesStatus === 0" @click="changeSalesStatus(product.productId)"
                 class="actionButton">
@@ -57,18 +55,12 @@
               <button v-else @click="changeSalesStatus(product.productId)" class="actionButton">
                 <i class="fas fa-xmark"></i>
               </button>
-
             </td>
-
             <td>
               <button @click="deletedProduct(product)" class="actionButton ">
                 <i class="fas fa-trash"></i>
               </button>
-
             </td>
-
-
-
           </tr>
         </tbody>
       </table>
@@ -111,12 +103,13 @@
               <input type="text" class="form-control" id="capacity" v-model="NewProduct.capacity">
             </div>
             <div class="form-group">
-              <label for="size">銀幕尺寸:</label>
+              <label for="size">螢幕尺寸:</label>
               <input type="text" class="form-control" id="size" v-model="NewProduct.size">
             </div>
             <div class="d-flex justify-content-end"> <!-- 新添加的 div -->
+              <button type="button" class="transparent-button" @click="demo"></button>
               <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
-              <button type="button" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
+              <button type="submit" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
             </div>
           </form>
         </div>
@@ -159,12 +152,12 @@
               <input type="text" class="form-control" id="capacity" v-model="NewProduct.capacity">
             </div>
             <div class="form-group">
-              <label for="size">銀幕尺寸:</label>
+              <label for="size">螢幕尺寸:</label>
               <input type="text" class="form-control" id="size" v-model="NewProduct.size">
             </div>
             <div class="d-flex justify-content-end">
               <button type="button" class="btn btn-secondary" @click="closeChangeModal">Close</button>
-              <button type="button" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
+              <button type="submit" class="btn btn-outline-dark ml-2" @click="saveProduct">Save</button>
             </div>
           </form>
         </div>
@@ -173,39 +166,6 @@
       </div>
     </div>
   </div>
-
-  <!--  modal-->
-  <div class="modal fade" id="saveAccountModal" tabindex="-1" aria-labelledby="saveAccountModal" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
-          <h5 class="modal-title" id="saveAccountModal">{{ this.modalMessage }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" @click="confirmModal()">確定</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="successAccountModal" tabindex="-1" aria-labelledby="successAccountModal" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-light text-black"> <!-- 更改背景顏色和標題顏色 -->
-          <h5 class="modal-title" id="successAccountModal">{{ this.modalMessage2 }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!--  modal-->
-
-
 
 </template>
 
@@ -237,14 +197,7 @@ export default {
       },
       searchTerm: '',
       filteredProducts: [],
-      myModal:'',
-      modalMessage:'',
-      modalMessage2:'',
-      modalType:'',
-      product:'',
-      productId:'',
     };
-
   },
   watch: {
     searchTerm(newValue) {
@@ -253,56 +206,19 @@ export default {
     },
   },
   methods: {
-    confirmModal(){
-      switch(this.modalType) {
-        case 1:
-          axios.delete(`${this.API_URL}/products/deleteProduct?productId=${this.product.productId}`)
-              .then(() => {
-                this.products = this.products.filter(p => p !== this.product);
-                console.log('刪除成功');
-                this.$router.go();
-              })
-              .catch(error => {
-                console.error('Error deleting product:', error);
-              });
-          break;
-        case 2:
-          console.log('New Product:', this.NewProduct);
-
-          axios.post(`${this.API_URL}/products/insertPhone`, this.NewProduct)
-              .then(response => {
-                this.resetFormData(); // 清空表单数据
-                console.log(response.data);
-                this.closeModal();
-                this.$router.go();
-
-
-              })
-              .catch(error => {
-                console.error('Error:', error);
-              });
-          break;
-        case 3:
-          axios.put(`${this.API_URL}/products/productSalesStatus?productId=${this.productId}`)
-              .then(response => {
-                console.log(response.data);
-                // 成功上下架後重新載入資料，更新產品列表
-                // this.fetchData();
-                this.$router.go();
-              })
-              .catch(error => {
-                console.error('Error:', error);
-              });
-      }
-    },
     deletedProduct(product) {
-      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
-      this.modalMessage='確定要刪除嗎？'
-      this.modalType=1;
-      this.product=product;
-      this.myModal.show();
-
-
+      console.log();
+      if (confirm("您確定要刪除這筆產品嗎？")) {
+        axios.delete(`${this.API_URL}/products/deleteProduct?productId=${product.productId}`)
+          .then(() => {
+            this.products = this.products.filter(p => p !== product);
+            console.log('刪除成功');
+            this.$router.go();
+          })
+          .catch(error => {
+            console.error('Error deleting product:', error);
+          });
+      }
     },
 
     redirectToSpec(product) {
@@ -339,29 +255,27 @@ export default {
             size.includes(searchTerm) ||
             productId.includes(searchTerm);
         });
-
         console.log(this.filteredProducts);
       }
     },
 
     saveProduct() {
-      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
-      this.modalMessage='確定要新增嗎？'
-      this.modalType=2;
-      this.myModal.show();
-
-    },
-    saveChangeProduct() {
       // 保存产品前先显示二次确认提示
-      if (confirm("您確定要保存這筆產品嗎？")) {
+      if (confirm("您確定要新增這筆產品嗎？")) {
         console.log('New Product:', this.NewProduct);
 
-        axios.put(`${this.API_URL}/products/updateProduct/${this.NewProduct.productId}`, this.NewProduct)
+        axios.post(`${this.API_URL}/products/insertPhone`, this.NewProduct)
           .then(response => {
             this.resetFormData(); // 清空表单数据
             console.log(response.data);
-            this.fetchData();
-            this.closeModal();
+            this.showLoadingAnimation
+
+            setTimeout(() => {
+              this.hideLoadingAnimation();
+              this.closeModal();
+              this.fetchData();
+            }, 1000);
+
           })
           .catch(error => {
             console.error('Error:', error);
@@ -371,13 +285,36 @@ export default {
         console.log('取消保存');
       }
     },
-    changeSalesStatus(productId) {
+    saveChangeProduct() {
+      if (confirm("您確定要保存這筆產品嗎？")) {
+        console.log('New Product:', this.NewProduct);
 
-      this.myModal = new bootstrap.Modal(document.getElementById('saveAccountModal'));
-      this.modalMessage='您確定要更改這筆產品販售狀態嗎？'
-      this.modalType=3;
-      this.productId=productId;
-      this.myModal.show();
+        axios.put(`${this.API_URL}/products/updateProduct/${this.NewProduct.productId}`, this.NewProduct)
+          .then(response => {
+            this.resetFormData();
+            console.log(response.data);
+            this.fetchData();
+            this.closeModal();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      } else {
+        console.log('取消保存');
+      }
+    },
+    changeSalesStatus(productId) {
+      if (confirm("您確定要更改這筆產品販售狀態嗎？")) { }
+      axios.put(`${this.API_URL}/products/productSalesStatus?productId=${productId}`)
+        .then(response => {
+          console.log(response.data);
+          // 成功上下架後重新載入資料，更新產品列表
+          // this.fetchData();
+          this.$router.go();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
     },
     resetFormData() {
       this.NewProduct = {
@@ -461,11 +398,19 @@ export default {
         loadingDiv.parentNode.removeChild(loadingDiv);
       }
     },
+    demo(){
+      this.NewProduct.productId = 'A1234'
+      this.NewProduct.productName = 'iphone 16'
+      this.NewProduct.productDescription = '來自未來的新型手機'
+      this.NewProduct.price = 39000
+      this.NewProduct.capacity = '512G'
+      this.NewProduct.size = '6.1吋'
+    }
   },
   created() {
     const loggedInMember = sessionStorage.getItem('loggedInMember');
     const loggedInMemberObject = JSON.parse(loggedInMember);
-    console.log(sessionStorage.getItem('loggedInMember'));
+    console.log(loggedInMemberObject);
     if (loggedInMemberObject === null) {
       alert('請先登入');
       this.$router.push('/login');
@@ -474,7 +419,6 @@ export default {
       console.log(role);
       console.log(role);
       if (role == '1' || role == '0') {
-        // alert('歡迎回來，管理者!!');
       } else {
         alert('權限不足');
         this.$router.push('/');
@@ -488,51 +432,45 @@ export default {
       .catch(error => {
         console.error('Error fetching products:', error);
       });
-
   },
 }
 </script>
 
 <style scoped>
-/* .container {
-  max-width: 95%;
-  overflow-x: auto;  啟用水平捲動
-} */
-
 .custom-link {
   background-color: transparent;
-  /* 背景透明 */
+
   color: black;
-  /* 文字颜色 */
-  /* padding: 7px; */
-  /* 设置内边距 */
+
+
+
   display: inline-block;
-  /* 让链接变成行内块元素，以便控制宽度和高度 */
+
   position: relative;
-  /* 使得子元素的绝对定位相对于父元素 */
+
   text-decoration: none;
-  /* 移除下划线 */
+
   transition: color 0.3s;
-  /* 添加文字颜色的过渡效果 */
-  /* top: 10px; */
+
+
 }
 
 .custom-link:hover {
   color: gray;
-  /* 鼠标移上去时文字颜色变为灰色 */
+
 }
 
 .custom-link b-icon {
   display: block;
-  /* 将图标变为块级元素 */
+
   position: absolute;
-  /* 绝对定位，以便于控制位置 */
+
   top: -10px;
-  /* 将图标上移 */
+
   left: 50%;
-  /* 水平居中 */
+
   transform: translateX(-50%);
-  /* 水平居中 */
+
 }
 
 .btn-outline-dark {
@@ -541,16 +479,16 @@ export default {
 
 .modal-header {
   position: relative;
-  /* 使得 .modal-header 成为定位上下文 */
+
 }
 
 .close {
   position: absolute;
-  /* 相对于 .modal-header 定位 */
+
   top: 10px;
-  /* 调整关闭按钮与顶部的距离 */
+
   right: 10px;
-  /* 调整关闭按钮与右侧的距离 */
+
 }
 
 .table-frame {
@@ -564,9 +502,9 @@ export default {
   position: sticky;
   top: 0;
   z-index: 2;
-  /* 確保標題行在上方 */
+
   background-color: #ffffff;
-  /* 可以選擇性地設置背景色 */
+
 }
 
 .table tbody td {
@@ -574,12 +512,12 @@ export default {
   vertical-align: bottom;
 }
 
-/* 定義主顏色 */
+
 :root {
   --primary-color: #007bff;
 }
 
-/* 定義按鈕樣式 */
+
 .table button {
   border: 1px solid #5B5B5B;
   border-radius: 20px;
@@ -592,7 +530,7 @@ export default {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* 按鈕懸停時變化 */
+
 .table button:hover {
   background-color: #5B5B5B;
   color: #E0E0E0;
@@ -600,23 +538,41 @@ export default {
 
 .table button {
   margin-right: 0px;
-  /* 設定按鈕的右邊距 */
+
 }
 
 .actionButton {
   color: black;
   border-color: black;
   transition: color 0.3s, border-color 0.3s;
-  /* 添加過渡效果 */
+
 }
 
 .actionButton:hover {
   color: gray;
-  /* 滑鼠移上時改變顏色 */
+
 }
 
 .actionButton:active {
   color: darkgray;
-  /* 按下按鈕時改變顏色 */
+
+}
+.transparent-button {
+  background-color: transparent; /* 背景顏色設為透明 */
+  border: none; /* 移除邊框 */
+  color: inherit; /* 文字顏色繼承父元素的顏色 */
+  cursor: pointer; /* 指示該元素是一個可點擊的按鈕 */
+  padding: 8px 16px; /* 添加內邊距，使按鈕更易於點擊 */
+  font-size: 16px; /* 設置字體大小 */
+  text-decoration: none; /* 移除下劃線 */
+  transition: background-color 0.3s ease; /* 添加過渡效果，使按鈕顏色變化更加平滑 */
+}
+
+.transparent-button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* 當滑鼠移動到按鈕上時，添加一個淡淡的背景色 */
+}
+
+.transparent-button:focus {
+  outline: none; /* 移除點擊時的外框線 */
 }
 </style>
